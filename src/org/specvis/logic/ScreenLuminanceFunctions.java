@@ -186,7 +186,7 @@ public class ScreenLuminanceFunctions {
     }
 
     public void saveNewScaleToFile(String id, String scaleName, String scaleHue, String scaleSaturation, String B0, String B20, String B40, String B60, String B80, String B100, String additionalInfo) {
-        File file = new File("screen_luminance_scales_list.s");
+        File file = new File("screen_luminance_scales.s");
         BufferedWriter writer;
         try {
             writer = new BufferedWriter(new FileWriter(file, true));
@@ -214,7 +214,7 @@ public class ScreenLuminanceFunctions {
                 if (scaleID.equals(str[0])) {
                     existingLuminanceScalesList.remove(i);
                     BufferedWriter writer;
-                    File file = new File("screen_luminance_scales_list.s");
+                    File file = new File("screen_luminance_scales.s");
                     try {
                         writer = new BufferedWriter(new FileWriter(file));
                         for (int j = 0; j < existingLuminanceScalesList.size(); j++) {
@@ -243,7 +243,7 @@ public class ScreenLuminanceFunctions {
         if (existingLuminanceScalesList.size() > 0) {
             for (int i = 0; i < existingLuminanceScalesList.size(); i++) {
                 BufferedWriter writer;
-                File file = new File("screen_luminance_scales_list.s");
+                File file = new File("screen_luminance_scales.s");
                 try {
                     writer = new BufferedWriter(new FileWriter(file));
                     for (int j = 0; j < existingLuminanceScalesList.size(); j++) {

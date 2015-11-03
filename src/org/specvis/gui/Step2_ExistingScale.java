@@ -25,6 +25,7 @@ import java.util.Optional;
 
 /**
  * Created by pdzwiniel on 2015-05-25.
+ * Last update by pdzwiniel on 2015-11-03.
  */
 
 /*
@@ -171,7 +172,7 @@ public class Step2_ExistingScale extends Stage {
 
     public ObservableList<ExistingLuminanceScaleData> getTableData() {
         ObservableList<ExistingLuminanceScaleData> data = FXCollections.observableArrayList();
-        File file = new File("screen_luminance_scales_list.s");
+        File file = new File("screen_luminance_scales.s");
         existingLuminanceScalesList = screenLuminanceFunctions.getExistingLuminanceScalesList(file);
         if (existingLuminanceScalesList.size() > 0) {
             ExistingLuminanceScaleData[] existingLuminanceScaleDatas = new ExistingLuminanceScaleData[existingLuminanceScalesList.size()];

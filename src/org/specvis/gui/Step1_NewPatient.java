@@ -24,6 +24,7 @@ import java.time.format.DateTimeFormatter;
 
 /**
  * Created by pdzwiniel on 2015-05-25.
+ * Last update by pdzwiniel on 2015-11-03.
  */
 
 /*
@@ -59,35 +60,39 @@ public class Step1_NewPatient extends Stage {
         BorderPane layout = new BorderPane();
 
         /* layout -> center */
-        int equalMinWidth = 100;
+        int minHeight = 25;
 
         Label labelID = new Label("ID:");
+        labelID.setMinHeight(minHeight);
 
-        TextField textFieldID = new TextField();
-        textFieldID.setMaxWidth(Double.MAX_VALUE);
+        TextField textFieldID = new TextField();;
         textFieldID.setEditable(false);
         textFieldID.setStyle("-fx-background-color: rgb(215,215,215)");
         textFieldID.setText(patientFunctions.createPatientIndividualID(patientFunctions.getCurrentDateYYYYmmDD(), 4));
+        textFieldID.setMinHeight(minHeight);
 
         Label labelGender = new Label("Gender:");
+        labelGender.setMinHeight(minHeight);
 
         ObservableList olGender = FXCollections.observableArrayList("Male", "Female", "Other");
         ComboBox cbGender = new ComboBox(olGender);
-        cbGender.setMaxWidth(Double.MAX_VALUE);
         cbGender.getSelectionModel().select(0);
+        cbGender.setMinHeight(minHeight);
 
         Label labelFirstName = new Label("First name:");
+        labelFirstName.setMinHeight(minHeight);
 
         TextField textFieldFirstName = new TextField();
-        textFieldFirstName.setMaxWidth(Double.MAX_VALUE);
+        textFieldFirstName.setMinHeight(minHeight);
 
         Label labelLastName = new Label("Last name:");
-        labelLastName.setMinWidth(equalMinWidth / 1.7);
+        labelLastName.setMinHeight(minHeight);
 
         TextField textFieldLastName = new TextField();
-        textFieldLastName.setMaxWidth(Double.MAX_VALUE);
+        textFieldLastName.setMinHeight(minHeight);
 
         Label labelDateOfBirth = new Label("Date of birth:");
+        labelDateOfBirth.setMinHeight(minHeight);
 
         DatePicker datePickerDateOfBirth = new DatePicker();
         datePickerDateOfBirth.setConverter(new StringConverter<LocalDate>() {
@@ -113,12 +118,13 @@ public class Step1_NewPatient extends Stage {
             }
         });
         datePickerDateOfBirth.setPromptText("yyyy-MM-dd");
-        datePickerDateOfBirth.setMaxWidth(Double.MAX_VALUE);
+        datePickerDateOfBirth.setMinHeight(minHeight);
 
         Label labelAge = new Label("Age:");
+        labelAge.setMinHeight(minHeight);
 
         TextField textFieldAge = new TextField();
-        textFieldAge.setMaxWidth(Double.MAX_VALUE);
+        textFieldAge.setMinHeight(minHeight);
 
         Button buttonAge = new Button("=");
         buttonAge.setOnAction(event -> {
@@ -136,39 +142,44 @@ public class Step1_NewPatient extends Stage {
         });
 
         Label labelPhone = new Label("Phone:");
+        labelPhone.setMinHeight(minHeight);
 
         TextField textFieldPhone = new TextField();
-        textFieldPhone.setMaxWidth(Double.MAX_VALUE);
+        textFieldPhone.setMinHeight(minHeight);
 
         Label labelEmail = new Label("Email:");
+        labelEmail.setMinHeight(minHeight);
 
         TextField textFieldEmail = new TextField();
-        textFieldEmail.setMaxWidth(Double.MAX_VALUE);
+        textFieldEmail.setMinHeight(minHeight);
 
         Label labelCity = new Label("City:");
+        labelCity.setMinHeight(minHeight);
 
         TextField textFieldCity = new TextField();
-        textFieldCity.setMaxWidth(Double.MAX_VALUE);
+        textFieldCity.setMinHeight(minHeight);
 
         Label labelPostalCode = new Label("Postal code:");
+        labelPostalCode.setMinHeight(minHeight);
 
         TextField textFieldPostalCode = new TextField();
-        textFieldPostalCode.setMaxWidth(Double.MAX_VALUE);
+        textFieldPostalCode.setMinHeight(minHeight);
 
-        Label labelVisualAcuityLeft = new Label("Visual acuity for left eye");
+        Label labelVisualAcuityLeft = new Label("Left eye VA:");
+        labelVisualAcuityLeft.setMinHeight(minHeight);
 
         TextField textFieldVisualAcuityLeft = new TextField();
-        textFieldVisualAcuityLeft.setMaxWidth(Double.MAX_VALUE);
+        textFieldVisualAcuityLeft.setMinHeight(minHeight);
 
-        Label labelVisualAcuityRight = new Label("and right");
+        Label labelVisualAcuityRight = new Label("Right eye VA:");
+        labelVisualAcuityRight.setMinHeight(minHeight);
 
         TextField textFieldVisualAcuityRight = new TextField();
-        textFieldVisualAcuityRight.setMaxWidth(Double.MAX_VALUE);
+        textFieldVisualAcuityRight.setMinHeight(minHeight);
 
         HBox hBox_1 = new HBox(10);
 
         Label labelAdditionalInfoAboutPatient = new Label ("Additional information about patient");
-        labelAdditionalInfoAboutPatient.setMinWidth(equalMinWidth);
 
         hBox_1.getChildren().addAll(labelAdditionalInfoAboutPatient);
         hBox_1.setAlignment(Pos.CENTER);
@@ -182,70 +193,29 @@ public class Step1_NewPatient extends Stage {
         hBox_2.setAlignment(Pos.CENTER);
         HBox.setHgrow(textAreaAdditionalInfoAboutPatient, Priority.ALWAYS);
 
-        HBox h1 = new HBox(10);
-        HBox h2 = new HBox(10);
-        HBox h3 = new HBox(10);
-        HBox h4 = new HBox(10);
-        HBox h5 = new HBox(10);
-        HBox h6 = new HBox(10);
+        VBox v1 = new VBox(10);
+        VBox v2 = new VBox(10);
+        VBox v3 = new VBox(10);
+        VBox v4 = new VBox(10);
 
-        h1.getChildren().addAll(labelID, textFieldID);
-        h2.getChildren().addAll(labelFirstName, textFieldFirstName);
-        h3.getChildren().addAll(labelDateOfBirth, datePickerDateOfBirth);
-        h4.getChildren().addAll(labelPhone, textFieldPhone);
-        h5.getChildren().addAll(labelCity, textFieldCity);
-        h6.getChildren().addAll(labelVisualAcuityLeft, textFieldVisualAcuityLeft);
+        v1.getChildren().addAll(labelID, labelFirstName, labelDateOfBirth, labelPhone, labelCity, labelVisualAcuityLeft);
+        v1.setAlignment(Pos.CENTER_LEFT);
 
-        HBox.setHgrow(textFieldID, Priority.ALWAYS);
-        HBox.setHgrow(textFieldFirstName, Priority.ALWAYS);
-        HBox.setHgrow(datePickerDateOfBirth, Priority.ALWAYS);
-        HBox.setHgrow(textFieldPhone, Priority.ALWAYS);
-        HBox.setHgrow(textFieldCity, Priority.ALWAYS);
-        HBox.setHgrow(textFieldVisualAcuityLeft, Priority.ALWAYS);
+        v2.getChildren().addAll(textFieldID, textFieldFirstName, datePickerDateOfBirth, textFieldPhone, textFieldCity, textFieldVisualAcuityLeft);
+        v2.setAlignment(Pos.CENTER_LEFT);
 
-        h1.setAlignment(Pos.CENTER_LEFT);
-        h2.setAlignment(Pos.CENTER_LEFT);
-        h3.setAlignment(Pos.CENTER_LEFT);
-        h4.setAlignment(Pos.CENTER_LEFT);
-        h5.setAlignment(Pos.CENTER_LEFT);
-        h6.setAlignment(Pos.CENTER_LEFT);
+        v3.getChildren().addAll(labelGender, labelLastName, labelAge, labelEmail, labelPostalCode, labelVisualAcuityRight);
+        v3.setAlignment(Pos.CENTER_LEFT);
 
-        VBox vBoxLeft = new VBox(10);
-        vBoxLeft.getChildren().addAll(h1, h2, h3, h4, h5, h6);
+        HBox hBoxAge = new HBox(10);
+        hBoxAge.getChildren().addAll(textFieldAge, buttonAge);
+        hBoxAge.setAlignment(Pos.CENTER_LEFT);
 
-        HBox h7 = new HBox(10);
-        HBox h8 = new HBox(10);
-        HBox h9 = new HBox(10);
-        HBox h10 = new HBox(10);
-        HBox h11 = new HBox(10);
-        HBox h12 = new HBox(10);
-
-        h7.getChildren().addAll(labelGender, cbGender);
-        h8.getChildren().addAll(labelLastName, textFieldLastName);
-        h9.getChildren().addAll(labelAge, textFieldAge, buttonAge);
-        h10.getChildren().addAll(labelEmail, textFieldEmail);
-        h11.getChildren().addAll(labelPostalCode, textFieldPostalCode);
-        h12.getChildren().addAll(labelVisualAcuityRight, textFieldVisualAcuityRight);
-
-        HBox.setHgrow(cbGender, Priority.ALWAYS);
-        HBox.setHgrow(textFieldLastName, Priority.ALWAYS);
-        HBox.setHgrow(textFieldAge, Priority.ALWAYS);
-        HBox.setHgrow(textFieldEmail, Priority.ALWAYS);
-        HBox.setHgrow(textFieldPostalCode, Priority.ALWAYS);
-        HBox.setHgrow(textFieldVisualAcuityRight, Priority.ALWAYS);
-
-        h7.setAlignment(Pos.CENTER_LEFT);
-        h8.setAlignment(Pos.CENTER_LEFT);
-        h9.setAlignment(Pos.CENTER_LEFT);
-        h10.setAlignment(Pos.CENTER_LEFT);
-        h11.setAlignment(Pos.CENTER_LEFT);
-        h12.setAlignment(Pos.CENTER_LEFT);
-
-        VBox vBoxRight = new VBox(10);
-        vBoxRight.getChildren().addAll(h7, h8, h9, h10, h11, h12);
+        v4.getChildren().addAll(cbGender, textFieldLastName, hBoxAge, textFieldEmail, textFieldPostalCode, textFieldVisualAcuityRight);
+        v4.setAlignment(Pos.CENTER_LEFT);
 
         HBox hBoxPrime = new HBox(10);
-        hBoxPrime.getChildren().addAll(vBoxLeft, vBoxRight);
+        hBoxPrime.getChildren().addAll(v1, v2, v3, v4);
 
         VBox vBoxPrime = new VBox(10);
         vBoxPrime.getChildren().addAll(hBoxPrime, hBox_1, hBox_2);
@@ -337,6 +307,7 @@ public class Step1_NewPatient extends Stage {
     public Step1_NewPatient(Step1_Patient step1_patient) {
         this.step1_patient = step1_patient;
         this.setScene(new Scene(createContent()));
+        this.setWidth(570);
         this.setTitle("Specvis");
         this.getIcons().add(new Image("/org/specvis/graphics/SpecvisIcon.png"));
     }

@@ -26,6 +26,7 @@ import java.util.Random;
 
 /**
  * Created by pdzwiniel on 2015-06-08.
+ * Last update by pdzwiniel on 2015-11-03.
  *
  * INFO:
  *
@@ -609,7 +610,7 @@ public class MainProcedure extends Stage {
                 double blindspotDistanceY;
                 if (data.getExaminedEye().equals("Right")) {
                     blindspotDistanceX = pixelsForOneDegreeX * blindspotDistFromFixPointHorizontally;
-                    blindspotDistanceY = pixelsForOneDegreeY * blindspotDistFromFixPointVertically;
+                    blindspotDistanceY = pixelsForOneDegreeY * (-blindspotDistFromFixPointVertically);
                 } else {
                     blindspotDistanceX = pixelsForOneDegreeX * (-blindspotDistFromFixPointHorizontally);
                     blindspotDistanceY = pixelsForOneDegreeY * (-blindspotDistFromFixPointVertically);

@@ -83,7 +83,7 @@ public class PatientFunctions {
                                      String age, String phone, String email, String city, String postalCode,
                                      String visualAcuityForLeftEye, String visualAcuityForRightEye,
                                      String additionalInformation) {
-        File file = new File("patients_list.s");
+        File file = new File("patients.s");
         BufferedWriter writer;
         try {
             writer = new BufferedWriter(new FileWriter(file, true));
@@ -144,7 +144,7 @@ public class PatientFunctions {
                 if (patientID.equals(pID)) {
                     existingPatientsList.remove(i);
                     BufferedWriter writer;
-                    File file = new File("patients_list.s");
+                    File file = new File("patients.s");
                     try {
                         writer = new BufferedWriter(new FileWriter(file));
                         for (int j = 0; j < existingPatientsList.size(); j++) {
@@ -173,7 +173,7 @@ public class PatientFunctions {
         if (existingPatientsList.size() > 0) {
             for (int i = 0; i < existingPatientsList.size(); i++) {
                 BufferedWriter writer;
-                File file = new File("patients_list.s");
+                File file = new File("patients.s");
                 try {
                     writer = new BufferedWriter(new FileWriter(file));
                     for (int j = 0; j < existingPatientsList.size(); j++) {

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 
 /**
  * Created by pdzwiniel on 2015-05-28.
+ * Last update by pdzwiniel on 2015-11-03.
  */
 
 /*
@@ -73,19 +74,6 @@ public class Step2_ScaleInfo extends Stage {
         int equalMinWidth = 100;
 
         VBox vBox = new VBox(10);
-
-//        HBox hBox_1 = new HBox(10);
-//
-//        Label labelInformationForExperimentator = new Label("Using a manual photometer, measure the luminance value " +
-//                "expressed in cd/m2 of six squares located below. The results of measurements type in the boxes " +
-//                "below each of the squares. Finally, enter a name for new scale and provide any additional " +
-//                "information if needed.");
-//        labelInformationForExperimentator.setWrapText(true);
-//        labelInformationForExperimentator.setPrefWidth(620);
-//        labelInformationForExperimentator.setTextAlignment(TextAlignment.CENTER);
-//
-//        hBox_1.getChildren().addAll(labelInformationForExperimentator);
-//        hBox_1.setAlignment(Pos.CENTER);
 
         HBox hBox_9 = new HBox(10);
 
@@ -345,7 +333,7 @@ public class Step2_ScaleInfo extends Stage {
                     }
                     luminanceScaleData.setLuminanceForBrightness(luminanceForBrightness);
 
-                    ArrayList<String> existingLuminanceScalesList = screenLuminanceFunctions.getExistingLuminanceScalesList(new File("screen_luminance_scales_list.s"));
+                    ArrayList<String> existingLuminanceScalesList = screenLuminanceFunctions.getExistingLuminanceScalesList(new File("screen_luminance_scales.s"));
                     String scaleID = luminanceScaleData.getScaleID();
                     for (int i = 0; i < existingLuminanceScalesList.size(); i++) {
                         String[] str = existingLuminanceScalesList.get(i).split("\t");

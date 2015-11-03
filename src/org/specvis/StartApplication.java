@@ -21,6 +21,7 @@ import java.util.ArrayList;
 
 /**
  * Created by pdzwiniel on 2015-05-20.
+ * Last update by pdzwiniel on 2015-11-03.
  */
 
 /*
@@ -92,7 +93,7 @@ public class StartApplication extends Application {
         );
         labelSpecvisLogo.setPrefSize(720, 270);
 
-        Label labelCopyright = new Label("Copyright \u00a9 2014-2015 Piotr Dzwiniel" + "\n" + "Version 0.2.0");
+        Label labelCopyright = new Label("Copyright \u00a9 2014-2015 Piotr Dzwiniel" + "\n" + "Version 0.2.1");
         labelCopyright.setStyle("-fx-font-size: 14px;");
         labelCopyright.setLayoutX(5);
         labelCopyright.setLayoutY(5);
@@ -151,7 +152,7 @@ public class StartApplication extends Application {
             bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
             String line;
             while ((line = bufferedReader.readLine()) != null) {
-                String[] str = line.split("=");
+                String[] str = line.split("=|;");
                 configurationValues.add(str[1]);
             }
             bufferedReader.close();

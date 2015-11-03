@@ -25,6 +25,7 @@ import java.util.Optional;
 
 /**
  * Created by pdzwiniel on 2015-05-25.
+ * Last update by pdzwiniel on 2015-11-03.
  */
 
 /*
@@ -142,7 +143,7 @@ public class Step1_ExistingPatient extends Stage {
 
     public ObservableList<ExistingPatientData> getTableData() {
         ObservableList<ExistingPatientData> data = FXCollections.observableArrayList();
-        File file = new File("patients_list.s");
+        File file = new File("patients.s");
         existingPatientsList = patientManagementFunctions.getExistingPatientsList(file);
         cipher = new Base64EncoderDecoder();
         if (existingPatientsList.size() > 0) {

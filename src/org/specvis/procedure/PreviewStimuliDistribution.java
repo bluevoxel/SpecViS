@@ -20,6 +20,7 @@ import java.util.List;
 
 /**
  * Created by pdzwiniel on 2015-06-10.
+ * Last update by pdzwiniel on 2015-11-03.
  */
 
 /*
@@ -203,7 +204,7 @@ public class PreviewStimuliDistribution extends Stage {
             double distanceY;
             if (data.getExaminedEye().equals("Right")) {
                 distanceX = pixelsForOneDegreeX * blindspotDistFromFixPointHorizontally;
-                distanceY = pixelsForOneDegreeY * blindspotDistFromFixPointVertically;
+                distanceY = pixelsForOneDegreeY * (-blindspotDistFromFixPointVertically);
             } else {
                 distanceX = pixelsForOneDegreeX * (-blindspotDistFromFixPointHorizontally);
                 distanceY = pixelsForOneDegreeY * (-blindspotDistFromFixPointVertically);
