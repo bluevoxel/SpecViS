@@ -17,10 +17,12 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import org.specvis.StartApplication;
 import org.specvis.data.ConfigurationData;
+import org.specvis.data.LuminanceScaleData;
 import org.specvis.procedure.*;
 
 /**
  * Created by pdzwiniel on 2015-05-20.
+ * Last update by pdzwiniel on 2015-11-20.
  */
 
 /*
@@ -286,9 +288,13 @@ public class Step4_FixationAndOther extends Stage {
         spinnerMonitorStimulusBrightness.setPrefWidth(80);
         spinnerMonitorStimulusBrightness.setEditable(true);
         spinnerMonitorStimulusBrightness.getValueFactory().setValue(Integer.valueOf(startApplication.getStageStep3Stimulus().getSpinnerStimulusMaxBrightness().getValue().toString()));
-        spinnerMonitorStimulusBrightness.setOnKeyReleased(event -> setLuminanceForGivenTextFields(Integer.valueOf(spinnerMonitorStimulusBrightness.getValue().toString()),
+        spinnerMonitorStimulusBrightness.setOnKeyReleased(event -> setLuminanceForGivenTextFields(
+                Integer.valueOf(spinnerMonitorStimulusBrightness.getValue().toString()),
+                startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleDataForStimuli(),
                 textFieldMonitorStimulusLuminance));
-        spinnerMonitorStimulusBrightness.setOnMousePressed(event -> setLuminanceForGivenTextFields(Integer.valueOf(spinnerMonitorStimulusBrightness.getValue().toString()),
+        spinnerMonitorStimulusBrightness.setOnMousePressed(event -> setLuminanceForGivenTextFields(
+                Integer.valueOf(spinnerMonitorStimulusBrightness.getValue().toString()),
+                startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleDataForStimuli(),
                 textFieldMonitorStimulusLuminance));
         spinnerMonitorStimulusBrightness.getValueFactory().setValue(Integer.valueOf(ConfigurationData.getMonitorStimulusBrightness()));
 
@@ -545,10 +551,10 @@ public class Step4_FixationAndOther extends Stage {
             spinnerFixationPointLuminance.setEditable(true);
             switch (target) {
                 case "Fixation point":
-                    spinnerFixationPointLuminance.getValueFactory().setValue(Double.valueOf(startApplication.getData().getLuminanceScaleData().getFixationPointMeasuredLuminance()));
+                    spinnerFixationPointLuminance.getValueFactory().setValue(Double.valueOf(startApplication.getData().getLuminanceScaleDataForStimuli().getFixationPointMeasuredLuminance()));
                     break;
                 case "Fixation point change":
-                    spinnerFixationPointLuminance.getValueFactory().setValue(Double.valueOf(startApplication.getData().getLuminanceScaleData().getFixationPointChangeMeasuredLuminance()));
+                    spinnerFixationPointLuminance.getValueFactory().setValue(Double.valueOf(startApplication.getData().getLuminanceScaleDataForStimuli().getFixationPointChangeMeasuredLuminance()));
                     break;
             }
 
@@ -561,10 +567,10 @@ public class Step4_FixationAndOther extends Stage {
             buttonAccept.setOnAction(event -> {
                 switch (target) {
                     case "Fixation point":
-                        startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleData().setFixationPointMeasuredLuminance(spinnerFixationPointLuminance.getValue().toString());
+                        startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleDataForStimuli().setFixationPointMeasuredLuminance(spinnerFixationPointLuminance.getValue().toString());
                         break;
                     case "Fixation point change":
-                        startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleData().setFixationPointChangeMeasuredLuminance(spinnerFixationPointLuminance.getValue().toString());
+                        startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleDataForStimuli().setFixationPointChangeMeasuredLuminance(spinnerFixationPointLuminance.getValue().toString());
                         break;
                 }
 
@@ -602,8 +608,8 @@ public class Step4_FixationAndOther extends Stage {
         this.getIcons().add(new Image("/org/specvis/graphics/SpecvisIcon.png"));
     }
 
-    public void setLuminanceForGivenTextFields(int brightness, TextField textFieldLuminance) {
-        double luminance = startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleData().getLuminanceForBrightness()[brightness];
+    public void setLuminanceForGivenTextFields(int brightness, LuminanceScaleData lsd, TextField textFieldLuminance) {
+        double luminance = lsd.getLuminanceForBrightness()[brightness];
         double value = startApplication.getStageStep2ScreenAndLuminance().getScreenLuminanceFunctions().round(luminance, 2);
         if (value < 0) {
             value = 0.0;
@@ -654,7 +660,8 @@ public class Step4_FixationAndOther extends Stage {
 
         // Step 2 - Luminance scale & screen
         startApplication.getData().setScreenLuminanceFunctions(startApplication.getStageStep2ScreenAndLuminance().getScreenLuminanceFunctions());
-        startApplication.getData().setLuminanceScaleData(startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleData());
+        startApplication.getData().setLuminanceScaleDataForStimuli(startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleDataForStimuli());
+        startApplication.getData().setLuminanceScaleDataForBackground(startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleDataForBackground());
         startApplication.getData().setActiveDisplayIndex(startApplication.getStageStep2ScreenAndLuminance().getCbActiveScreen().getSelectionModel().getSelectedIndex());
         startApplication.getData().setScreenResolutionX(Integer.valueOf(startApplication.getStageStep2ScreenAndLuminance().getTextFieldScreenResolutionX().getText()));
         startApplication.getData().setScreenResolutionY(Integer.valueOf(startApplication.getStageStep2ScreenAndLuminance().getTextFieldScreenResolutionY().getText()));
@@ -666,6 +673,7 @@ public class Step4_FixationAndOther extends Stage {
 
         // Step 3 - Stimulus & background
         startApplication.getData().setStimulusMaxBrightness(Integer.valueOf(startApplication.getStageStep3Stimulus().getSpinnerStimulusMaxBrightness().getValue().toString()));
+        startApplication.getData().setStimulusMinBrightness(Integer.valueOf(startApplication.getStageStep3Stimulus().getSpinnerStimulusMinBrightness().getValue().toString()));
         startApplication.getData().setStimulusShape(startApplication.getStageStep3Stimulus().getCbStimulusShape().getSelectionModel().getSelectedItem().toString());
         startApplication.getData().setStimulusInclination(Double.valueOf(startApplication.getStageStep3Stimulus().getSpinnerStimulusInclination().getValue().toString()));
         startApplication.getData().setStimulusWidthInDegrees(Double.valueOf(startApplication.getStageStep3Stimulus().getSpinnerStimulusWidth().getValue().toString()));

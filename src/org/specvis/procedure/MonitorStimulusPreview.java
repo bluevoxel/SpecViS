@@ -17,6 +17,7 @@ import javafx.stage.Stage;
 
 /**
  * Created by pdzwiniel on 2015-06-10.
+ * Last update by pdzwiniel on 2015-11-12.
  */
 
 /*
@@ -77,12 +78,12 @@ public class MonitorStimulusPreview extends Stage {
         BorderPane.setMargin(vBoxCenter, new Insets(10, 10, 10, 10));
         BorderPane.setMargin(hBoxBottom, new Insets(10, 10, 10, 10));
 
-        setPaneFixationPointPreviewBackgroundColor(Integer.valueOf(data.getLuminanceScaleData().getScaleHue()),
-                Integer.valueOf(data.getLuminanceScaleData().getScaleSaturation()), data.getBackgroundBrightness());
+        setPaneFixationPointPreviewBackgroundColor(Integer.valueOf(data.getLuminanceScaleDataForBackground().getScaleHue()),
+                Integer.valueOf(data.getLuminanceScaleDataForBackground().getScaleSaturation()), data.getBackgroundBrightness());
 
         setMonitorStimulus(100, 100, data.getMonitorStimulusWidth(), data.getMonitorStimulusHeight(),
-                Color.hsb(Integer.valueOf(data.getLuminanceScaleData().getScaleHue()),
-                        Double.valueOf(data.getLuminanceScaleData().getScaleSaturation()) / 100,
+                Color.hsb(Integer.valueOf(data.getLuminanceScaleDataForStimuli().getScaleHue()),
+                        Double.valueOf(data.getLuminanceScaleDataForStimuli().getScaleSaturation()) / 100,
                         data.getMonitorStimulusBrightness() / 100));
 
         return layout;

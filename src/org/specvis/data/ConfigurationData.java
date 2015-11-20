@@ -32,6 +32,7 @@ public class ConfigurationData {
     private static String screenHeight;
     private static String patientDistance;
     private static String stimulusMaxBrightness;
+    private static String stimulusMinBrightness;
     private static String stimulusShape;
     private static String stimulusInclination;
     private static String stimulusWidth;
@@ -64,6 +65,7 @@ public class ConfigurationData {
     private static String blindspotMappingRangeVertically_2;
     private static String blindspotMappingStimulusDisplayRepetitions;
     private static String blindspotMappingAccuracy;
+    private static String visualFieldTestBrightnessVectorLength;
 
     public static String getLuminanceScaleFitPolynomialDegree() {
         return luminanceScaleFitPolynomialDegree;
@@ -111,6 +113,14 @@ public class ConfigurationData {
 
     public static void setStimulusMaxBrightness(String stimulusMaxBrightness) {
         ConfigurationData.stimulusMaxBrightness = stimulusMaxBrightness;
+    }
+
+    public static String getStimulusMinBrightness() {
+        return stimulusMinBrightness;
+    }
+
+    public static void setStimulusMinBrightness(String stimulusMinBrightness) {
+        ConfigurationData.stimulusMinBrightness = stimulusMinBrightness;
     }
 
     public static String getStimulusShape() {
@@ -367,5 +377,13 @@ public class ConfigurationData {
 
     public static void setBlindspotMappingAccuracy(String blindspotMappingAccuracy) {
         ConfigurationData.blindspotMappingAccuracy = blindspotMappingAccuracy;
+    }
+
+    public static String getVisualFieldTestBrightnessVectorLength() {
+        return visualFieldTestBrightnessVectorLength;
+    }
+
+    public static void setVisualFieldTestBrightnessVectorLength(String visualFieldTestBrightnessVectorLength) {
+        ConfigurationData.visualFieldTestBrightnessVectorLength = visualFieldTestBrightnessVectorLength;
     }
 }

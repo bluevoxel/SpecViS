@@ -16,6 +16,7 @@ import javafx.stage.Stage;
 
 /**
  * Created by pdzwiniel on 2015-06-09.
+ * Last update by pdzwiniel on 2015-11-12.
  */
 
 /*
@@ -100,8 +101,8 @@ public class CompareFixationPointBeforeAndAfterChange extends Stage {
     }
 
     public void setPanesBackgroundColor() {
-        int hue = Integer.valueOf(data.getLuminanceScaleData().getScaleHue());
-        int saturation = Integer.valueOf(data.getLuminanceScaleData().getScaleSaturation());
+        int hue = Integer.valueOf(data.getLuminanceScaleDataForBackground().getScaleHue());
+        int saturation = Integer.valueOf(data.getLuminanceScaleDataForBackground().getScaleSaturation());
         int brightness = Integer.valueOf(data.getBackgroundBrightness());
 
         paneFixPointBefore.setStyle("-fx-background-color: hsb(" + hue + ", " + saturation + "%, " + brightness + "%);");

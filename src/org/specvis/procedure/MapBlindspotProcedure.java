@@ -27,6 +27,7 @@ import java.util.Random;
 
 /**
  * Created by pdzwiniel on 2015-06-14.
+ * Last update by pdzwiniel on 2015-11-12.
  */
 
 /*
@@ -139,8 +140,8 @@ public class MapBlindspotProcedure extends Stage {
         screenResolutionY = data.getScreenResolutionY();
         visualFieldX = data.getVisualFieldX();
         visualFieldY = data.getVisualFieldY();
-        backgroundHue = Integer.valueOf(data.getLuminanceScaleData().getScaleHue());
-        backgroundSaturation = Integer.valueOf(data.getLuminanceScaleData().getScaleSaturation());
+        backgroundHue = Integer.valueOf(data.getLuminanceScaleDataForBackground().getScaleHue());
+        backgroundSaturation = Integer.valueOf(data.getLuminanceScaleDataForBackground().getScaleSaturation());
         backgroundBrightness = data.getBackgroundBrightness();
         pixelsForOneDegreeX = screenResolutionX / visualFieldX;
         pixelsForOneDegreeY = screenResolutionY / visualFieldY;
@@ -303,8 +304,8 @@ public class MapBlindspotProcedure extends Stage {
                 * examinedEyeCoeff), centerY + (pixelsForOneDegreeY * verticalDistanceFromTheCenterOfHorizontalBlindspotRange),
                 radiusX, radiusY);
 
-        Color monitorStimulusColor = Color.hsb(Integer.valueOf(data.getLuminanceScaleData().getScaleHue()),
-                Double.valueOf(data.getLuminanceScaleData().getScaleSaturation()) / 100,
+        Color monitorStimulusColor = Color.hsb(Integer.valueOf(data.getLuminanceScaleDataForStimuli().getScaleHue()),
+                Double.valueOf(data.getLuminanceScaleDataForStimuli().getScaleSaturation()) / 100,
                 data.getMonitorStimulusBrightness() / 100);
 
         monitorStimulus.setFill(monitorStimulusColor);

@@ -21,6 +21,7 @@ import java.awt.*;
 
 /**
  * Created by pdzwiniel on 2015-05-20.
+ * Last update by pdzwiniel on 2015-11-12.
  */
 
 /*
@@ -43,11 +44,12 @@ import java.awt.*;
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-public class Step2_LuminanceScaleAndScreen extends Stage {
+public class Step2_ScreenAndLuminanceScale extends Stage {
 
     private StartApplication startApplication;
     private ScreenLuminanceFunctions screenLuminanceFunctions;
-    private LuminanceScaleData luminanceScaleData;
+    private LuminanceScaleData luminanceScaleDataForStimuli;
+    private LuminanceScaleData luminanceScaleDataForBackground;
     private ComboBox cbActiveScreen;
     private TextField textFieldScreenResolutionX;
     private TextField textFieldScreenResolutionY;
@@ -56,7 +58,8 @@ public class Step2_LuminanceScaleAndScreen extends Stage {
     private Spinner spinnerPatientDistance;
     private TextField textFieldInvolvedVisualFieldX;
     private TextField textFieldInvolvedVisualFieldY;
-    private TextField textFieldScreenLuminanceScale;
+    private TextField textFieldStimulusScaleName;
+    private TextField textFieldBackgroundScaleName;
     private TextField textFieldB0;
     private TextField textFieldB20;
     private TextField textFieldB40;
@@ -70,13 +73,14 @@ public class Step2_LuminanceScaleAndScreen extends Stage {
         screenLuminanceFunctions = new ScreenLuminanceFunctions();
 
         /* init data */
-        luminanceScaleData = new LuminanceScaleData();
+        luminanceScaleDataForStimuli = new LuminanceScaleData();
+        luminanceScaleDataForBackground = new LuminanceScaleData();
 
         /* layout */
         BorderPane layout = new BorderPane();
 
         /* layout -> top -> step indicator */
-        Text textProgressBar = new Text("Step 2/4 - Luminance scale & screen");
+        Text textProgressBar = new Text("Step 2/4 - Screen & luminance scale");
         ProgressBar progressBar = new ProgressBar();
         progressBar.setProgress(0.50);
         progressBar.setPrefHeight(30);
@@ -108,7 +112,7 @@ public class Step2_LuminanceScaleAndScreen extends Stage {
         });
         cbActiveScreen.getSelectionModel().select(0);
 
-        Button buttonRefreshActiveScreenList = new Button("R");
+        Button buttonRefreshActiveScreenList = new Button("Refresh list of active screens");
         buttonRefreshActiveScreenList.setOnAction(event1 -> {
             cbActiveScreen.getItems().clear();
             cbActiveScreen.setItems(screenLuminanceFunctions.getActiveDisplaysObservableList());
@@ -116,6 +120,7 @@ public class Step2_LuminanceScaleAndScreen extends Stage {
 
             setInvolvedVisualFieldXY(screenLuminanceFunctions, 2);
         });
+        buttonRefreshActiveScreenList.setMaxWidth(Double.MAX_VALUE);
 
         Label labelScreenResolution = new Label("Resolution:");
         labelScreenResolution.setMinWidth(equalMinWidth * 1.1);
@@ -125,7 +130,7 @@ public class Step2_LuminanceScaleAndScreen extends Stage {
         textFieldScreenResolutionX.setEditable(false);
         textFieldScreenResolutionX.setStyle("-fx-background-color: rgb(215,215,215)");
 
-        Label labelScreenResolutionSpace = new Label("x");
+        //Label labelScreenResolutionSpace = new Label("x");
 
         textFieldScreenResolutionY = new TextField();
         textFieldScreenResolutionY.setPrefWidth(equalMinWidth / 1.5);
@@ -138,7 +143,7 @@ public class Step2_LuminanceScaleAndScreen extends Stage {
         textFieldScreenResolutionX.setText(String.valueOf(activeDisplayResolution[0]));
         textFieldScreenResolutionY.setText(String.valueOf(activeDisplayResolution[1]));
 
-        Label labelScreenWidth = new Label("Width:");
+        Label labelScreenWidth = new Label("Width & height (mm):");
         labelScreenWidth.setMinWidth(equalMinWidth * 1.1);
 
         spinnerScreenWidth = new Spinner(1, 10000, 535);
@@ -148,8 +153,8 @@ public class Step2_LuminanceScaleAndScreen extends Stage {
         spinnerScreenWidth.setOnMousePressed(event -> setInvolvedVisualFieldXY(screenLuminanceFunctions, 2));
         spinnerScreenWidth.getValueFactory().setValue(Integer.valueOf(ConfigurationData.getScreenWidth()));
 
-        Label labelScreenHeight = new Label("Height:");
-        labelScreenHeight.setAlignment(Pos.CENTER);
+        //Label labelScreenHeight = new Label("Height:");
+        //labelScreenHeight.setAlignment(Pos.CENTER);
 
         spinnerScreenHeight = new Spinner(1, 10000, 300);
         spinnerScreenHeight.setEditable(true);
@@ -159,7 +164,7 @@ public class Step2_LuminanceScaleAndScreen extends Stage {
         spinnerScreenHeight.setOnMousePressed(event -> setInvolvedVisualFieldXY(screenLuminanceFunctions, 2));
         spinnerScreenHeight.getValueFactory().setValue(Integer.valueOf(ConfigurationData.getScreenHeight()));
 
-        Label labelScreenWidthHeightMM = new Label("(mm)");
+        //Label labelScreenWidthHeightMM = new Label("(mm)");
 
         Label labelPatientDistance = new Label("Patient distance (mm):");
         labelPatientDistance.setMinWidth(equalMinWidth * 1.1);
@@ -186,19 +191,34 @@ public class Step2_LuminanceScaleAndScreen extends Stage {
 
         setInvolvedVisualFieldXY(screenLuminanceFunctions, 2);
 
-        Label labelScreenLuminanceScale = new Label("Screen luminance scale name:");
-        labelScreenLuminanceScale.setMinWidth(equalMinWidth * 1.4);
+        Label labelStimulusScale = new Label("Stimulus scale");
+        labelStimulusScale.setMinWidth(100);
 
-        textFieldScreenLuminanceScale = new TextField();
-        textFieldScreenLuminanceScale.setPrefWidth(equalMinWidth / 2);
-        textFieldScreenLuminanceScale.setMaxWidth(Double.MAX_VALUE);
-        textFieldScreenLuminanceScale.setEditable(false);
-        textFieldScreenLuminanceScale.setStyle("-fx-background-color: rgb(215,215,215)");
+        Button buttonNewStimulusScale = new Button("Create new scale");
+        buttonNewStimulusScale.setOnAction(event -> {
+            Step2_NewScale stage = new Step2_NewScale(this);
+            stage.show();
+        });
 
-        Button buttonInfoAboutScale = new Button("?");
-        buttonInfoAboutScale.setOnAction(event -> {
-            if (!textFieldScreenLuminanceScale.getText().equals("")) {
-                Step2_ScaleInfo stage = new Step2_ScaleInfo(this);
+        Button buttonExistingStimulusScale = new Button("Choose existing one");
+        buttonExistingStimulusScale.setOnAction(event -> {
+            Step2_ExistingScale stage = new Step2_ExistingScale(this, "Stimulus");
+            stage.show();
+        });
+        buttonExistingStimulusScale.setMaxWidth(Double.MAX_VALUE);
+
+        Label labelStimulusScaleName = new Label("Scale name");
+        labelStimulusScaleName.setMinWidth(100);
+
+        textFieldStimulusScaleName = new TextField();
+        textFieldStimulusScaleName.setMaxWidth(Double.MAX_VALUE);
+        textFieldStimulusScaleName.setEditable(false);
+        textFieldStimulusScaleName.setStyle("-fx-background-color: rgb(215,215,215)");
+
+        Button buttonInfoAboutStimulusScale = new Button("Edit");
+        buttonInfoAboutStimulusScale.setOnAction(event -> {
+            if (!textFieldStimulusScaleName.getText().equals("")) {
+                Step2_ScaleInfo stage = new Step2_ScaleInfo(this, "Stimulus");
                 stage.show();
             } else {
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -210,10 +230,10 @@ public class Step2_LuminanceScaleAndScreen extends Stage {
             }
         });
 
-        Button buttonPreviewLuminanceBrightnessScale = new Button("P");
-        buttonPreviewLuminanceBrightnessScale.setOnAction(event -> {
-            if (!textFieldScreenLuminanceScale.getText().equals("")) {
-                Step2_ScalePreview stage = new Step2_ScalePreview(luminanceScaleData);
+        Button buttonPreviewLuminanceBrightnessStimulusScale = new Button("Fit");
+        buttonPreviewLuminanceBrightnessStimulusScale.setOnAction(event -> {
+            if (!textFieldStimulusScaleName.getText().equals("")) {
+                Step2_ScalePreview stage = new Step2_ScalePreview(luminanceScaleDataForStimuli);
                 stage.show();
             } else {
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -225,69 +245,53 @@ public class Step2_LuminanceScaleAndScreen extends Stage {
             }
         });
 
-        Button buttonNewScale = new Button("New scale");
-        buttonNewScale.setOnAction(event -> {
-            Step2_NewScale stage = new Step2_NewScale(this);
+        Label labelBackgroundScale = new Label("Background scale");
+        labelBackgroundScale.setMinWidth(100);
+
+        Button buttonExistingBackgroundScale = new Button("Choose existing one");
+        buttonExistingBackgroundScale.setOnAction(event -> {
+            Step2_ExistingScale stage = new Step2_ExistingScale(this, "Background");
             stage.show();
         });
-        buttonNewScale.setMaxWidth(Double.MAX_VALUE);
+        buttonExistingBackgroundScale.setMaxWidth(Double.MAX_VALUE);
 
-        Button buttonExistingScale = new Button("Existing scale");
-        buttonExistingScale.setOnAction(event -> {
-            Step2_ExistingScale stage = new Step2_ExistingScale(this);
-            stage.show();
+        Label labelBackgroundScaleName = new Label("Scale name");
+        labelBackgroundScaleName.setMinWidth(100);
+
+        textFieldBackgroundScaleName = new TextField();
+        textFieldBackgroundScaleName.setMaxWidth(Double.MAX_VALUE);
+        textFieldBackgroundScaleName.setEditable(false);
+        textFieldBackgroundScaleName.setStyle("-fx-background-color: rgb(215,215,215)");
+
+        Button buttonInfoAboutBackgoundScale = new Button("Edit");
+        buttonInfoAboutBackgoundScale.setOnAction(event -> {
+            if (!textFieldBackgroundScaleName.getText().equals("")) {
+                Step2_ScaleInfo stage = new Step2_ScaleInfo(this, "Background");
+                stage.show();
+            } else {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Information");
+                alert.setHeaderText("Choose scale first.");
+                alert.setContentText("You can't open screen luminance scale info window without selecting a scale. " +
+                        "Create new scale or choose existing one and than try again.");
+                alert.showAndWait();
+            }
         });
-        buttonExistingScale.setMaxWidth(Double.MAX_VALUE);
 
-        Label labelLuminance = new Label("Screen luminance (cd/m2) for specific brightness (%)");
-
-        Label labelB0 = new Label("B0:");
-        labelB0.setMinWidth(equalMinWidth/3.5);
-
-        textFieldB0 = new TextField();
-        textFieldB0.setPrefWidth(equalMinWidth / 2);
-        textFieldB0.setEditable(false);
-        textFieldB0.setStyle("-fx-background-color: rgb(215,215,215)");
-
-        Label labelB20 = new Label("B20:");
-        labelB20.setMinWidth(equalMinWidth/3.5);
-
-        textFieldB20 = new TextField();
-        textFieldB20.setPrefWidth(equalMinWidth / 2);
-        textFieldB20.setEditable(false);
-        textFieldB20.setStyle("-fx-background-color: rgb(215,215,215)");
-
-        Label labelB40 = new Label("B40:");
-        labelB40.setMinWidth(equalMinWidth/3.5);
-
-        textFieldB40 = new TextField();
-        textFieldB40.setPrefWidth(equalMinWidth / 2);
-        textFieldB40.setEditable(false);
-        textFieldB40.setStyle("-fx-background-color: rgb(215,215,215)");
-
-        Label labelB60 = new Label("B60:");
-        labelB60.setMinWidth(equalMinWidth/3.5);
-
-        textFieldB60 = new TextField();
-        textFieldB60.setPrefWidth(equalMinWidth / 2);
-        textFieldB60.setEditable(false);
-        textFieldB60.setStyle("-fx-background-color: rgb(215,215,215)");
-
-        Label labelB80 = new Label("B80:");
-        labelB80.setMinWidth(equalMinWidth/3.5);
-
-        textFieldB80 = new TextField();
-        textFieldB80.setPrefWidth(equalMinWidth / 2);
-        textFieldB80.setEditable(false);
-        textFieldB80.setStyle("-fx-background-color: rgb(215,215,215)");
-
-        Label labelB100 = new Label("B100:");
-        labelB100.setMinWidth(equalMinWidth / 3.5);
-
-        textFieldB100 = new TextField();
-        textFieldB100.setPrefWidth(equalMinWidth / 2);
-        textFieldB100.setEditable(false);
-        textFieldB100.setStyle("-fx-background-color: rgb(215,215,215)");
+        Button buttonPreviewLuminanceBrightnessBackgroundScale = new Button("Fit");
+        buttonPreviewLuminanceBrightnessBackgroundScale.setOnAction(event -> {
+            if (!textFieldBackgroundScaleName.getText().equals("")) {
+                Step2_ScalePreview stage = new Step2_ScalePreview(luminanceScaleDataForBackground);
+                stage.show();
+            } else {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Information");
+                alert.setHeaderText("Choose scale first.");
+                alert.setContentText("You can't open screen luminance scale preview window without selecting a scale. " +
+                        "Create new scale or choose existing one and than try again.");
+                alert.showAndWait();
+            }
+        });
 
         /* layout -> center (add items) */
         HBox h1 = new HBox(10);
@@ -295,14 +299,18 @@ public class Step2_LuminanceScaleAndScreen extends Stage {
         HBox h3 = new HBox(10);
         HBox h4 = new HBox(10);
         HBox h5 = new HBox(10);
+        HBox h8 = new HBox(10);
 
-        h1.getChildren().addAll(labelActiveScreen, cbActiveScreen, buttonRefreshActiveScreenList);
+        h1.getChildren().addAll(labelActiveScreen, cbActiveScreen);
         h1.setAlignment(Pos.CENTER_LEFT);
 
-        h2.getChildren().addAll(labelScreenResolution, textFieldScreenResolutionX, labelScreenResolutionSpace, textFieldScreenResolutionY);
+        h8.getChildren().addAll(buttonRefreshActiveScreenList);
+        h8.setAlignment(Pos.CENTER);
+
+        h2.getChildren().addAll(labelScreenResolution, textFieldScreenResolutionX, textFieldScreenResolutionY);
         h2.setAlignment(Pos.CENTER_LEFT);
 
-        h3.getChildren().addAll(labelScreenWidth, spinnerScreenWidth, labelScreenHeight, spinnerScreenHeight, labelScreenWidthHeightMM);
+        h3.getChildren().addAll(labelScreenWidth, spinnerScreenWidth, spinnerScreenHeight);
         h3.setAlignment(Pos.CENTER_LEFT);
 
         h4.getChildren().addAll(labelPatientDistance, spinnerPatientDistance);
@@ -312,68 +320,43 @@ public class Step2_LuminanceScaleAndScreen extends Stage {
         h5.setAlignment(Pos.CENTER_LEFT);
 
         VBox vBoxScreen = new VBox(10);
-        vBoxScreen.getChildren().addAll(h1, h2, h3, h4, h5);
+        vBoxScreen.getChildren().addAll(h8, new Separator(), h1, h2, h3, h4, h5);
 
         TitledPane titledPaneScreen = new TitledPane("Screen", vBoxScreen);
 
         HBox h6 = new HBox(10);
         HBox h7 = new HBox(10);
-        HBox h8 = new HBox(10);
-        HBox h9 = new HBox(10);
-        VBox h9_vBox1 = new VBox(5);
-        VBox h9_vBox2 = new VBox(5);
-        HBox h9_vBox1_h1 = new HBox(10);
-        HBox h9_vBox1_h2 = new HBox(10);
-        HBox h9_vBox1_h3 = new HBox(10);
-        HBox h9_vBox2_h1 = new HBox(10);
-        HBox h9_vBox2_h2 = new HBox(10);
-        HBox h9_vBox2_h3 = new HBox(10);
+        HBox h10 = new HBox(10);
+        HBox h11 = new HBox(10);
+        HBox h12 = new HBox(10);
 
-        h6.getChildren().addAll(labelScreenLuminanceScale, textFieldScreenLuminanceScale, buttonInfoAboutScale, buttonPreviewLuminanceBrightnessScale);
+        h6.getChildren().addAll(labelStimulusScaleName, textFieldStimulusScaleName);
         h6.setAlignment(Pos.CENTER_LEFT);
-        HBox.setHgrow(textFieldScreenLuminanceScale, Priority.ALWAYS);
+        HBox.setHgrow(textFieldStimulusScaleName, Priority.ALWAYS);
 
-        h7.getChildren().addAll(buttonNewScale, buttonExistingScale);
+        h7.getChildren().addAll(labelStimulusScale, buttonExistingStimulusScale, buttonInfoAboutStimulusScale, buttonPreviewLuminanceBrightnessStimulusScale);
         h7.setAlignment(Pos.CENTER_LEFT);
-        HBox.setHgrow(buttonNewScale, Priority.ALWAYS);
-        HBox.setHgrow(buttonExistingScale, Priority.ALWAYS);
+        HBox.setHgrow(buttonExistingStimulusScale, Priority.ALWAYS);
 
-        h8.getChildren().addAll(labelLuminance);
-        h8.setAlignment(Pos.CENTER);
+        h10.getChildren().addAll(buttonNewStimulusScale);
+        h10.setAlignment(Pos.CENTER);
 
-        h9_vBox1_h1.getChildren().addAll(labelB0, textFieldB0);
-        h9_vBox1_h1.setAlignment(Pos.CENTER_LEFT);
+        h11.getChildren().addAll(labelBackgroundScale, buttonExistingBackgroundScale, buttonInfoAboutBackgoundScale, buttonPreviewLuminanceBrightnessBackgroundScale);
+        h11.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(buttonExistingBackgroundScale, Priority.ALWAYS);
 
-        h9_vBox1_h2.getChildren().addAll(labelB20, textFieldB20);
-        h9_vBox1_h2.setAlignment(Pos.CENTER_LEFT);
-
-        h9_vBox1_h3.getChildren().addAll(labelB40, textFieldB40);
-        h9_vBox1_h3.setAlignment(Pos.CENTER_LEFT);
-
-        h9_vBox1.getChildren().addAll(h9_vBox1_h1, h9_vBox1_h2, h9_vBox1_h3);
-
-        h9_vBox2_h1.getChildren().addAll(labelB60, textFieldB60);
-        h9_vBox2_h1.setAlignment(Pos.CENTER_LEFT);
-
-        h9_vBox2_h2.getChildren().addAll(labelB80, textFieldB80);
-        h9_vBox2_h2.setAlignment(Pos.CENTER_LEFT);
-
-        h9_vBox2_h3.getChildren().addAll(labelB100, textFieldB100);
-        h9_vBox2_h3.setAlignment(Pos.CENTER_LEFT);
-
-        h9_vBox2.getChildren().addAll(h9_vBox2_h1, h9_vBox2_h2, h9_vBox2_h3);
-
-        h9.getChildren().addAll(h9_vBox1, h9_vBox2);
-        h9.setAlignment(Pos.CENTER);
+        h12.getChildren().addAll(labelBackgroundScaleName, textFieldBackgroundScaleName);
+        h12.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(textFieldBackgroundScaleName, Priority.ALWAYS);
 
         VBox vBoxScale = new VBox(10);
-        vBoxScale.getChildren().addAll(h6, h7, h8, h9);
+        vBoxScale.getChildren().addAll(h10, new Separator(), h7, h6, new Separator(), h11, h12);
 
         TitledPane titledPaneScale = new TitledPane("Luminance scale", vBoxScale);
 
         Accordion accordion = new Accordion();
-        accordion.getPanes().addAll(titledPaneScale, titledPaneScreen);
-        accordion.setExpandedPane(titledPaneScale);
+        accordion.getPanes().addAll(titledPaneScreen, titledPaneScale);
+        accordion.setExpandedPane(titledPaneScreen);
 
         /* layout -> bottom */
         HBox hBoxBottom = new HBox(10);
@@ -386,16 +369,17 @@ public class Step2_LuminanceScaleAndScreen extends Stage {
 
         Button buttonNext = new Button("Next");
         buttonNext.setOnAction(event -> {
-            if (!textFieldScreenLuminanceScale.getText().equals("")) {
+            if (!textFieldStimulusScaleName.getText().equals("") && !textFieldBackgroundScaleName.getText().equals("")) {
                 this.hide();
                 startApplication.getStageStep3Stimulus().show();
                 startApplication.getStageStep3Stimulus().fireSpinnerStimulusMaxBrightness();
+                startApplication.getStageStep3Stimulus().fireSpinnerStimulusMinBrightness();
                 startApplication.getStageStep3Stimulus().setTextForDistanceBetweenStimuliTextFields();
                 startApplication.getStageStep3Stimulus().fireSpinnerBackgroundBrightness();
                 startApplication.getStageStep3Stimulus().setScreenLuminanceFunctions(screenLuminanceFunctions);
                 startApplication.getStageStep3Stimulus().setPaneStimulusPreviewBackgroundColor(
-                        Integer.valueOf(luminanceScaleData.getScaleHue()),
-                        Integer.valueOf(luminanceScaleData.getScaleSaturation()),
+                        Integer.valueOf(luminanceScaleDataForBackground.getScaleHue()),
+                        Integer.valueOf(luminanceScaleDataForBackground.getScaleSaturation()),
                         Integer.valueOf(startApplication.getStageStep3Stimulus().getSpinnerBackgroundBrightness()
                                 .getValue().toString()));
                 startApplication.getStageStep3Stimulus().setStimulusRepresentationOnPreviewPane();
@@ -422,7 +406,7 @@ public class Step2_LuminanceScaleAndScreen extends Stage {
         return layout;
     }
 
-    public Step2_LuminanceScaleAndScreen(StartApplication startApplication) {
+    public Step2_ScreenAndLuminanceScale(StartApplication startApplication) {
         this.startApplication = startApplication;
         this.setScene(new Scene(createContent()));
         this.setTitle("Specvis");
@@ -442,40 +426,28 @@ public class Step2_LuminanceScaleAndScreen extends Stage {
         textFieldInvolvedVisualFieldY.setText(String.valueOf(visY));
     }
 
-    public TextField getTextFieldB0() {
-        return textFieldB0;
+    public TextField getTextFieldStimulusScaleName() {
+        return textFieldStimulusScaleName;
     }
 
-    public TextField getTextFieldB20() {
-        return textFieldB20;
+    public TextField getTextFieldBackgroundScaleName() {
+        return textFieldBackgroundScaleName;
     }
 
-    public TextField getTextFieldB40() {
-        return textFieldB40;
+    public LuminanceScaleData getLuminanceScaleDataForStimuli() {
+        return luminanceScaleDataForStimuli;
     }
 
-    public TextField getTextFieldB60() {
-        return textFieldB60;
+    public void setLuminanceScaleDataForStimuli(LuminanceScaleData luminanceScaleDataForStimuli) {
+        this.luminanceScaleDataForStimuli = luminanceScaleDataForStimuli;
     }
 
-    public TextField getTextFieldB80() {
-        return textFieldB80;
+    public LuminanceScaleData getLuminanceScaleDataForBackground() {
+        return luminanceScaleDataForBackground;
     }
 
-    public TextField getTextFieldB100() {
-        return textFieldB100;
-    }
-
-    public TextField getTextFieldScreenLuminanceScale() {
-        return textFieldScreenLuminanceScale;
-    }
-
-    public LuminanceScaleData getLuminanceScaleData() {
-        return luminanceScaleData;
-    }
-
-    public void setLuminanceScaleData(LuminanceScaleData luminanceScaleData) {
-        this.luminanceScaleData = luminanceScaleData;
+    public void setLuminanceScaleDataForBackground(LuminanceScaleData luminanceScaleDataForBackground) {
+        this.luminanceScaleDataForBackground = luminanceScaleDataForBackground;
     }
 
     public ScreenLuminanceFunctions getScreenLuminanceFunctions() {

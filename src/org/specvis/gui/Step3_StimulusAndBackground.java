@@ -20,11 +20,13 @@ import javafx.stage.Stage;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.specvis.StartApplication;
 import org.specvis.data.ConfigurationData;
+import org.specvis.data.LuminanceScaleData;
 import org.specvis.logic.ScreenLuminanceFunctions;
 import org.specvis.procedure.PreviewStimuliDistribution;
 
 /**
  * Created by pdzwiniel on 2015-05-20.
+ * Last update by pdzwiniel on 2015-11-12.
  */
 
 /*
@@ -51,7 +53,9 @@ public class Step3_StimulusAndBackground extends Stage {
 
     private ScreenLuminanceFunctions screenLuminanceFunctions;
     private Spinner spinnerStimulusMaxBrightness;
+    private Spinner spinnerStimulusMinBrightness;
     private TextField textFieldStimulusInitialLuminance;
+    private TextField textFieldStimulusMinLuminance;
     private ComboBox cbStimulusShape;
     private Spinner spinnerStimulusInclination;
     private Spinner spinnerStimulusWidth;
@@ -90,31 +94,69 @@ public class Step3_StimulusAndBackground extends Stage {
         /* layout -> center */
         int equalMinWidth = 110;
 
-        Label labelStimulusInitial = new Label("Stimulus max brightness (%):");
+        Label labelStimulusInitial = new Label("Stimulus max. brightness (%):");
         labelStimulusInitial.setMinWidth(equalMinWidth * 1.5);
 
         spinnerStimulusMaxBrightness = new Spinner(0, 100, 100);
         spinnerStimulusMaxBrightness.setEditable(true);
         spinnerStimulusMaxBrightness.setOnKeyReleased(event -> {
             setLuminanceTextFieldsValues(Integer.valueOf(spinnerStimulusMaxBrightness.getValue().toString()),
+                    startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleDataForStimuli(),
                     textFieldStimulusInitialLuminance);
             setStimulusRepresentationOnPreviewPane();
         });
         spinnerStimulusMaxBrightness.setOnMouseClicked(event -> {
             setLuminanceTextFieldsValues(Integer.valueOf(spinnerStimulusMaxBrightness.getValue().toString()),
+                    startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleDataForStimuli(),
                     textFieldStimulusInitialLuminance);
             setStimulusRepresentationOnPreviewPane();
         });
         spinnerStimulusMaxBrightness.setPrefWidth(80);
         spinnerStimulusMaxBrightness.getValueFactory().setValue(Integer.valueOf(ConfigurationData.getStimulusMaxBrightness()));
 
-        Label labelStimulusInitialLuminance = new Label("Stimulus max lum. (cd/m2):");
+        Label labelStimulusInitialLuminance = new Label("Stimulus max. lum. (cd/m2):");
         labelStimulusInitialLuminance.setMinWidth(equalMinWidth * 1.5);
 
         textFieldStimulusInitialLuminance = new TextField();
         textFieldStimulusInitialLuminance.setPrefWidth(80);
         textFieldStimulusInitialLuminance.setEditable(false);
         textFieldStimulusInitialLuminance.setStyle("-fx-background-color: rgb(215,215,215)");
+
+        /**
+         * STIMULUS MINIMUM LUMINANCE
+         */
+
+        Label labelStimulusMinimumBrightness = new Label("Stimulus min. brightness (%):");
+        labelStimulusMinimumBrightness.setMinWidth(equalMinWidth * 1.5);
+
+        spinnerStimulusMinBrightness = new Spinner(0, 100, 100);
+        spinnerStimulusMinBrightness.setEditable(true);
+        spinnerStimulusMinBrightness.setOnKeyReleased(event -> {
+            setLuminanceTextFieldsValues(Integer.valueOf(spinnerStimulusMinBrightness.getValue().toString()),
+                    startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleDataForStimuli(),
+                    textFieldStimulusMinLuminance);
+            setStimulusRepresentationOnPreviewPane();
+        });
+        spinnerStimulusMinBrightness.setOnMouseClicked(event -> {
+            setLuminanceTextFieldsValues(Integer.valueOf(spinnerStimulusMinBrightness.getValue().toString()),
+                    startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleDataForStimuli(),
+                    textFieldStimulusMinLuminance);
+            setStimulusRepresentationOnPreviewPane();
+        });
+        spinnerStimulusMinBrightness.setPrefWidth(80);
+        spinnerStimulusMinBrightness.getValueFactory().setValue(Integer.valueOf(ConfigurationData.getStimulusMinBrightness()));
+
+        Label labelStimulusMinimumLuminance = new Label("Stimulus min. lum. (cd/m2):");
+        labelStimulusMinimumLuminance.setMinWidth(equalMinWidth * 1.5);
+
+        textFieldStimulusMinLuminance = new TextField();
+        textFieldStimulusMinLuminance.setPrefWidth(80);
+        textFieldStimulusMinLuminance.setEditable(false);
+        textFieldStimulusMinLuminance.setStyle("-fx-background-color: rgb(215,215,215)");
+
+        /**
+         * STIMULUS MINIMUM LUMINANCE
+         */
 
         Label labelStimulusShape = new Label("Stimulus shape:");
         labelStimulusShape.setMinWidth(equalMinWidth);
@@ -163,30 +205,32 @@ public class Step3_StimulusAndBackground extends Stage {
         spinnerBackgroundBrightness.setEditable(true);
         spinnerBackgroundBrightness.setOnKeyReleased(event -> {
             setLuminanceTextFieldsValues(Integer.valueOf(spinnerBackgroundBrightness.getValue().toString()),
+                    startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleDataForBackground(),
                     textFieldBackgroundLuminance);
             setPaneStimulusPreviewBackgroundColor(
-                    Integer.valueOf(startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleData().getScaleHue()),
-                    Integer.valueOf(startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleData().getScaleSaturation()),
+                    Integer.valueOf(startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleDataForBackground().getScaleHue()),
+                    Integer.valueOf(startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleDataForBackground().getScaleSaturation()),
                     Integer.valueOf(spinnerBackgroundBrightness.getValue().toString()));
             setStimulusRepresentationOnPreviewPane();
 
             startApplication.getStageStep4General().setPaneFixationPointPreviewBackgroundColor(
-                    Integer.valueOf(startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleData().getScaleHue()),
-                    Integer.valueOf(startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleData().getScaleSaturation()),
+                    Integer.valueOf(startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleDataForBackground().getScaleHue()),
+                    Integer.valueOf(startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleDataForBackground().getScaleSaturation()),
                     Integer.valueOf(spinnerBackgroundBrightness.getValue().toString()));
         });
         spinnerBackgroundBrightness.setOnMouseClicked(event -> {
             setLuminanceTextFieldsValues(Integer.valueOf(spinnerBackgroundBrightness.getValue().toString()),
+                    startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleDataForBackground(),
                     textFieldBackgroundLuminance);
             setPaneStimulusPreviewBackgroundColor(
-                    Integer.valueOf(startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleData().getScaleHue()),
-                    Integer.valueOf(startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleData().getScaleSaturation()),
+                    Integer.valueOf(startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleDataForBackground().getScaleHue()),
+                    Integer.valueOf(startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleDataForBackground().getScaleSaturation()),
                     Integer.valueOf(spinnerBackgroundBrightness.getValue().toString()));
             setStimulusRepresentationOnPreviewPane();
 
             startApplication.getStageStep4General().setPaneFixationPointPreviewBackgroundColor(
-                    Integer.valueOf(startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleData().getScaleHue()),
-                    Integer.valueOf(startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleData().getScaleSaturation()),
+                    Integer.valueOf(startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleDataForBackground().getScaleHue()),
+                    Integer.valueOf(startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleDataForBackground().getScaleSaturation()),
                     Integer.valueOf(spinnerBackgroundBrightness.getValue().toString()));
         });
         spinnerBackgroundBrightness.setPrefWidth(80);
@@ -290,6 +334,8 @@ public class Step3_StimulusAndBackground extends Stage {
         HBox h12 = new HBox(10);
         HBox h13 = new HBox(10);
         HBox h15 = new HBox(10);
+        HBox h16 = new HBox(10);
+        HBox h17 = new HBox(10);
 
         h1.getChildren().addAll(labelStimulusInitial, spinnerStimulusMaxBrightness);
         h1.setAlignment(Pos.CENTER_LEFT);
@@ -319,28 +365,34 @@ public class Step3_StimulusAndBackground extends Stage {
         h9.getChildren().addAll(labelStimulusDisplayTime, spinnerStimulusDisplayTime);
         h9.setAlignment(Pos.CENTER);
 
-        h11.getChildren().addAll(labelTimeIntervalBetweenStimuli);
-        h11.setAlignment(Pos.CENTER);
-
         h10.getChildren().addAll(labelConstantPart, spinnerIntervalBetweenStimuliConstantPart, labelRandomPart, spinnerIntervalBetweenStimuliRandomPart);
         h10.setAlignment(Pos.CENTER);
 
-        h14.getChildren().addAll(labelDistanceBetweenStimuli);
-        h14.setAlignment(Pos.CENTER);
-
-        h13.getChildren().addAll(labelDistanceBetweenStimuliHorizontally, textFieldDistanceBetweenStimuliHorizontally,
-                labelDistanceBetweenStimuliVertically, textFieldDistanceBetweenStimuliVertically);
-        h13.setAlignment(Pos.CENTER_LEFT);
-
-        h15.getChildren().addAll(labelQuarterGridResolution);
-        h15.setAlignment(Pos.CENTER);
+        h11.getChildren().addAll(labelTimeIntervalBetweenStimuli);
+        h11.setAlignment(Pos.CENTER);
 
         h12.getChildren().addAll(labelQuarterGridResolutionX, spinnerQuarterGridResolutionX, labelQuarterGridResolutionY,
                 spinnerQuarterGridResolutionY);
         h12.setAlignment(Pos.CENTER);
 
-        vBoxLeft.getChildren().addAll(h1, h5, new Separator(), h2, h6, h3, h7,new Separator(), h9, h11, h10, new Separator(), h14, h13);
-        vBoxRight.getChildren().addAll(h4, h8, new Separator(), h15, h12, titledPaneStimulusPreview);
+        h13.getChildren().addAll(labelDistanceBetweenStimuliHorizontally, textFieldDistanceBetweenStimuliHorizontally,
+                labelDistanceBetweenStimuliVertically, textFieldDistanceBetweenStimuliVertically);
+        h13.setAlignment(Pos.CENTER_LEFT);
+
+        h14.getChildren().addAll(labelDistanceBetweenStimuli);
+        h14.setAlignment(Pos.CENTER);
+
+        h15.getChildren().addAll(labelQuarterGridResolution);
+        h15.setAlignment(Pos.CENTER);
+
+        h16.getChildren().addAll(labelStimulusMinimumBrightness, spinnerStimulusMinBrightness);
+        h16.setAlignment(Pos.CENTER_LEFT);
+
+        h17.getChildren().addAll(labelStimulusMinimumLuminance, textFieldStimulusMinLuminance);
+        h17.setAlignment(Pos.CENTER_LEFT);
+
+        vBoxLeft.getChildren().addAll(h1, h5, new Separator(), h16, h17, new Separator(), h2, h6, h3, h7,new Separator(), h9, h11, h10);
+        vBoxRight.getChildren().addAll(h4, h8, new Separator(), h15, h12, new Separator(), h14, h13, titledPaneStimulusPreview);
 
         hBoxPrime.getChildren().addAll(vBoxLeft, new Separator(Orientation.VERTICAL), vBoxRight);
 
@@ -368,11 +420,13 @@ public class Step3_StimulusAndBackground extends Stage {
             if (brightnessDifference >= 11) {
                 this.hide();
                 startApplication.getStageStep4General().show();
-                startApplication.getStageStep4General().setLuminanceForGivenTextFields(Integer.valueOf(startApplication.getStageStep4General().getSpinnerMonitorStimulusBrightness().getValue().toString()),
+                startApplication.getStageStep4General().setLuminanceForGivenTextFields(
+                        Integer.valueOf(startApplication.getStageStep4General().getSpinnerMonitorStimulusBrightness().getValue().toString()),
+                        startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleDataForStimuli(),
                         startApplication.getStageStep4General().getTextFieldMonitorStimulusLuminance());
                 startApplication.getStageStep4General().setPaneFixationPointPreviewBackgroundColor(
-                        Integer.valueOf(startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleData().getScaleHue()),
-                        Integer.valueOf(startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleData().getScaleSaturation()),
+                        Integer.valueOf(startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleDataForBackground().getScaleHue()),
+                        Integer.valueOf(startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleDataForBackground().getScaleSaturation()),
                         Integer.valueOf(spinnerBackgroundBrightness.getValue().toString())
                 );
                 startApplication.getStageStep4General().setFixationPointRepresentationOnPreviewPane();
@@ -426,12 +480,8 @@ public class Step3_StimulusAndBackground extends Stage {
         textFieldDistanceBetweenStimuliVertically.setText(String.format("%.2f", distance[1]).replace(",", "."));
     }
 
-    public double getFittedLuminanceForGivenBrightness(int brightness) {
-        return startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleData().getLuminanceForBrightness()[brightness];
-    }
-
-    public void setLuminanceTextFieldsValues(int brightness, TextField textFieldLuminance) {
-        double luminance = getFittedLuminanceForGivenBrightness(brightness);
+    public void setLuminanceTextFieldsValues(int brightness, LuminanceScaleData lsd, TextField textFieldLuminance) {
+        double luminance = lsd.getLuminanceForBrightness()[brightness];
         double value = screenLuminanceFunctions.round(luminance, 2);
         if (value < 0) {
             value = 0.0;
@@ -441,11 +491,19 @@ public class Step3_StimulusAndBackground extends Stage {
 
     public void fireSpinnerStimulusMaxBrightness() {
         setLuminanceTextFieldsValues(Integer.valueOf(spinnerStimulusMaxBrightness.getValue().toString()),
+                startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleDataForStimuli(),
                 textFieldStimulusInitialLuminance);
+    }
+
+    public void fireSpinnerStimulusMinBrightness() {
+        setLuminanceTextFieldsValues(Integer.valueOf(spinnerStimulusMinBrightness.getValue().toString()),
+                startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleDataForStimuli(),
+                textFieldStimulusMinLuminance);
     }
 
     public void fireSpinnerBackgroundBrightness() {
         setLuminanceTextFieldsValues(Integer.valueOf(spinnerBackgroundBrightness.getValue().toString()),
+                startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleDataForBackground(),
                 textFieldBackgroundLuminance);
     }
 
@@ -533,16 +591,16 @@ public class Step3_StimulusAndBackground extends Stage {
             stimulusRepresentation = createEllipseStimulus(100, 100,
                     Double.valueOf(spinnerStimulusWidth.getValue().toString()),
                     Double.valueOf(spinnerStimulusHeight.getValue().toString()),
-                    Color.hsb(Integer.valueOf(startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleData().getScaleHue()),
-                            Double.valueOf(startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleData().getScaleSaturation()) / 100,
+                    Color.hsb(Integer.valueOf(startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleDataForStimuli().getScaleHue()),
+                            Double.valueOf(startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleDataForStimuli().getScaleSaturation()) / 100,
                             Double.valueOf(spinnerStimulusMaxBrightness.getValue().toString()) / 100)
             );
         } else {
             stimulusRepresentation = createPolygonStimulus(100, 100,
                     Double.valueOf(spinnerStimulusWidth.getValue().toString()),
                     Double.valueOf(spinnerStimulusHeight.getValue().toString()),
-                    Color.hsb(Integer.valueOf(startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleData().getScaleHue()),
-                            Double.valueOf(startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleData().getScaleSaturation()) / 100,
+                    Color.hsb(Integer.valueOf(startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleDataForStimuli().getScaleHue()),
+                            Double.valueOf(startApplication.getStageStep2ScreenAndLuminance().getLuminanceScaleDataForStimuli().getScaleSaturation()) / 100,
                             Double.valueOf(spinnerStimulusMaxBrightness.getValue().toString()) / 100),
                     Double.valueOf(spinnerStimulusInclination.getValue().toString()));
         }
@@ -552,6 +610,10 @@ public class Step3_StimulusAndBackground extends Stage {
 
     public Spinner getSpinnerStimulusMaxBrightness() {
         return spinnerStimulusMaxBrightness;
+    }
+
+    public Spinner getSpinnerStimulusMinBrightness() {
+        return spinnerStimulusMinBrightness;
     }
 
     public ComboBox getCbStimulusShape() {

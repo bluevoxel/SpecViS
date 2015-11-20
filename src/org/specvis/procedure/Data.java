@@ -9,6 +9,7 @@ import java.util.ArrayList;
 
 /**
  * Created by pdzwiniel on 2015-06-08.
+ * Last update by pdzwiniel on 2015-11-20.
  */
 
 /*
@@ -46,11 +47,13 @@ public class Data {
     private int patientDistanceInMm;
     private double visualFieldX;
     private double visualFieldY;
-    private LuminanceScaleData luminanceScaleData;
+    private LuminanceScaleData luminanceScaleDataForStimuli;
+    private LuminanceScaleData luminanceScaleDataForBackground;
     private ScreenLuminanceFunctions screenLuminanceFunctions;
 
     /* Step 3 - Stimulus & background */
     private int stimulusMaxBrightness;
+    private int stimulusMinBrightness;
     private String stimulusShape;
     private double stimulusInclination;
     private double stimulusWidthInDegrees;
@@ -171,6 +174,14 @@ public class Data {
 
     public void setStimulusMaxBrightness(int stimulusInitialBrightness) {
         this.stimulusMaxBrightness = stimulusInitialBrightness;
+    }
+
+    public int getStimulusMinBrightness() {
+        return stimulusMinBrightness;
+    }
+
+    public void setStimulusMinBrightness(int stimulusMinBrightness) {
+        this.stimulusMinBrightness = stimulusMinBrightness;
     }
 
     public String getStimulusShape() {
@@ -317,12 +328,20 @@ public class Data {
         this.patientInfoData = patientInfoData;
     }
 
-    public LuminanceScaleData getLuminanceScaleData() {
-        return luminanceScaleData;
+    public LuminanceScaleData getLuminanceScaleDataForStimuli() {
+        return luminanceScaleDataForStimuli;
     }
 
-    public void setLuminanceScaleData(LuminanceScaleData luminanceScaleData) {
-        this.luminanceScaleData = luminanceScaleData;
+    public void setLuminanceScaleDataForStimuli(LuminanceScaleData luminanceScaleDataForStimuli) {
+        this.luminanceScaleDataForStimuli = luminanceScaleDataForStimuli;
+    }
+
+    public LuminanceScaleData getLuminanceScaleDataForBackground() {
+        return luminanceScaleDataForBackground;
+    }
+
+    public void setLuminanceScaleDataForBackground(LuminanceScaleData luminanceScaleDataForBackground) {
+        this.luminanceScaleDataForBackground = luminanceScaleDataForBackground;
     }
 
     public ScreenLuminanceFunctions getScreenLuminanceFunctions() {

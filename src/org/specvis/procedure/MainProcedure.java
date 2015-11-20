@@ -19,6 +19,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.specvis.data.ConfigurationData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +27,7 @@ import java.util.Random;
 
 /**
  * Created by pdzwiniel on 2015-06-08.
- * Last update by pdzwiniel on 2015-11-03.
+ * Last update by pdzwiniel on 2015-11-20.
  *
  * INFO:
  *
@@ -78,6 +79,7 @@ public class MainProcedure extends Stage {
     private int backgroundSaturation;
     private int backgroundBrightness;
     private int stimulusMaxBrightness;
+    private int stimulusMinBrightness;
     private double stimulusWidthInPixels;
     private double stimulusHeightInPixels;
     private String fixationMonitor;
@@ -106,6 +108,7 @@ public class MainProcedure extends Stage {
     private int[] brightnessVector;
     private long startOfTheProcedureTime;
     private long endOfProcedureTime;
+    private int visualFieldTestBrightnessVectorLength;
 
     public Parent createContent() {
 
@@ -115,10 +118,11 @@ public class MainProcedure extends Stage {
         screenResolutionY = data.getScreenResolutionY();
         quarterGridResolutionX = data.getQuarterGridResolutionX();
         quarterGridResolutionY = data.getQuarterGridResolutionY();
-        backgroundHue = Integer.valueOf(data.getLuminanceScaleData().getScaleHue());
-        backgroundSaturation = Integer.valueOf(data.getLuminanceScaleData().getScaleSaturation());
+        backgroundHue = Integer.valueOf(data.getLuminanceScaleDataForBackground().getScaleHue());
+        backgroundSaturation = Integer.valueOf(data.getLuminanceScaleDataForBackground().getScaleSaturation());
         backgroundBrightness = data.getBackgroundBrightness();
         stimulusMaxBrightness = data.getStimulusMaxBrightness();
+        stimulusMinBrightness = data.getStimulusMinBrightness();
         fixationMonitor = data.getFixationMonitor();
         monitoringFixationEvery_X_Stimuli = data.isMonitoringFixationEvery_X_Stimuli();
         monitoringFixationEvery_Y_Stimuli = data.isMonitoringFixationEvery_Y_Stimuli();
@@ -140,11 +144,13 @@ public class MainProcedure extends Stage {
         procedureIsFinished = false;
         data.setIsMainProcedureFinished(false);
         randomGenerator = new Random();
-        brightnessVector = new int[11];
-        List<Double> linspace = data.getScreenLuminanceFunctions().linspace(backgroundBrightness, stimulusMaxBrightness, 12, true);
-        for (int i = 1; i <= 11; i++) {
+
+        visualFieldTestBrightnessVectorLength = Integer.valueOf(ConfigurationData.getVisualFieldTestBrightnessVectorLength());
+        brightnessVector = new int[visualFieldTestBrightnessVectorLength];
+        List<Double> linspace = data.getScreenLuminanceFunctions().linspace(stimulusMinBrightness, stimulusMaxBrightness, visualFieldTestBrightnessVectorLength, true);
+        for (int i = 0; i < visualFieldTestBrightnessVectorLength; i++) {
             double d = linspace.get(i);
-            brightnessVector[i - 1] = (int) d;
+            brightnessVector[i] = (int) d;
         }
         data.setStimuliVerifiedBrightnessValues(brightnessVector);
 
@@ -169,8 +175,8 @@ public class MainProcedure extends Stage {
                 // Shape.
                 Shape shape = createStimulus(
                         data.getStimulusShape(),
-                        Color.hsb(Integer.valueOf(data.getLuminanceScaleData().getScaleHue()),
-                                Double.valueOf(data.getLuminanceScaleData().getScaleSaturation()) / 100,
+                        Color.hsb(Integer.valueOf(data.getLuminanceScaleDataForStimuli().getScaleHue()),
+                                Double.valueOf(data.getLuminanceScaleDataForStimuli().getScaleSaturation()) / 100,
                                 Double.valueOf(data.getStimulusMaxBrightness()) / 100),
                         data.getStimulusInclination());
                 shape.setLayoutX((squareX / 2) + (i * squareX) - (stimulusWidthInPixels / 2));
@@ -359,9 +365,12 @@ public class MainProcedure extends Stage {
         if (answers[2] != 0) {
             boolean shouldStimulusBeDeactivated = false;
 
-            boolean[] threshold = new boolean[] {true, true, true, true, true, true, true, true, true, true, true};
-            int currentBrightnessIndex = 5; // the middle one
-            int lastBrightnessIndex = 5;
+            boolean[] threshold = new boolean[visualFieldTestBrightnessVectorLength];
+            for (int i = 0; i < visualFieldTestBrightnessVectorLength; i++) {
+                threshold[i] = true;
+            }
+            int currentBrightnessIndex = visualFieldTestBrightnessVectorLength / 2; // the middle one
+            int lastBrightnessIndex = visualFieldTestBrightnessVectorLength / 2;
 
             int currentAnswer;
             int lastAnswer = answers[0];
@@ -370,7 +379,7 @@ public class MainProcedure extends Stage {
                 currentAnswer = answers[i];
                 switch (answers[i]) {
                     case 1:
-                        if ((currentBrightnessIndex != 1 && currentBrightnessIndex != 9) && currentAnswer == lastAnswer) {
+                        if ((currentBrightnessIndex != 1 && currentBrightnessIndex != (visualFieldTestBrightnessVectorLength - 2)) && currentAnswer == lastAnswer) {
                             for (int j = 0; j <= lastBrightnessIndex; j++) {
                                 threshold[j] = false;
                             }
@@ -383,13 +392,13 @@ public class MainProcedure extends Stage {
                         }
                         break;
                     case 2:
-                        if ((currentBrightnessIndex != 1 && currentBrightnessIndex != 9) && currentAnswer == lastAnswer) {
-                            for (int j = 10; j >= lastBrightnessIndex; j--) {
+                        if ((currentBrightnessIndex != 1 && currentBrightnessIndex != (visualFieldTestBrightnessVectorLength - 2)) && currentAnswer == lastAnswer) {
+                            for (int j = (visualFieldTestBrightnessVectorLength - 1); j >= lastBrightnessIndex; j--) {
                                 threshold[j] = false;
                             }
                             currentBrightnessIndex -= 2;
                         } else {
-                            for (int j = 10; j >= lastBrightnessIndex; j--) {
+                            for (int j = (visualFieldTestBrightnessVectorLength - 1); j >= lastBrightnessIndex; j--) {
                                 threshold[j] = false;
                             }
                             currentBrightnessIndex -= 1;
@@ -397,7 +406,7 @@ public class MainProcedure extends Stage {
                         break;
                 }
 
-                if (currentBrightnessIndex > 10 || currentBrightnessIndex < 0) {
+                if (currentBrightnessIndex > (visualFieldTestBrightnessVectorLength - 1) || currentBrightnessIndex < 0) {
                     currentlyDisplayedStimulus.setEvaluatedBrightnessThreshold(brightnessVector[lastBrightnessIndex]);
                     shouldStimulusBeDeactivated = true;
                     break;
@@ -426,11 +435,11 @@ public class MainProcedure extends Stage {
                 shellWindowForMainProcedure.getTextProgressBar().setText(String.valueOf(numberOfCurrentStimulus) + "/" + String.valueOf(totalNumberOfStimulusToShow));
                 shellWindowForMainProcedure.getProgressBar().setProgress(1.0 * (Double.valueOf(numberOfCurrentStimulus) / Double.valueOf(totalNumberOfStimulusToShow)));
 
-                double stiMaxLum = data.getLuminanceScaleData().getLuminanceForBrightness()[data.getStimulusMaxBrightness()];
-                double bgLum = data.getLuminanceScaleData().getLuminanceForBrightness()[data.getBackgroundBrightness()];
+                double stiMaxLum = data.getLuminanceScaleDataForStimuli().getLuminanceForBrightness()[data.getStimulusMaxBrightness()];
+                double bgLum = data.getLuminanceScaleDataForBackground().getLuminanceForBrightness()[data.getBackgroundBrightness()];
                 int stiID = currentlyDisplayedStimulus.getStimulusAssignedIndex();
                 int stibBrighThresh = currentlyDisplayedStimulus.getEvaluatedBrightnessThreshold();
-                double stiLumThresh = data.getScreenLuminanceFunctions().round(data.getLuminanceScaleData().getLuminanceForBrightness()[currentlyDisplayedStimulus.getEvaluatedBrightnessThreshold()], 2);
+                double stiLumThresh = data.getScreenLuminanceFunctions().round(data.getLuminanceScaleDataForStimuli().getLuminanceForBrightness()[currentlyDisplayedStimulus.getEvaluatedBrightnessThreshold()], 2);
                 double stiDbThresh = data.getScreenLuminanceFunctions().decibelsValue(stiMaxLum, stiLumThresh, bgLum, 2);
 
                 shellWindowForMainProcedure.addTextToTextArea(stiID + "\t" + stibBrighThresh + "\t" + stiLumThresh + "\t" + stiDbThresh + "\n");
@@ -440,7 +449,7 @@ public class MainProcedure extends Stage {
                 stimulusResults.setStimulusNumber(currentlyDisplayedStimulus.getStimulusAssignedIndex());
                 stimulusResults.setStimulusGridCoordinatesXY(currentlyDisplayedStimulus.getStimulusCellCoordinatesXY());
                 stimulusResults.setStimulusBrightnessThreshold(currentlyDisplayedStimulus.getEvaluatedBrightnessThreshold());
-                stimulusResults.setStimulusLuminanceThreshold(data.getScreenLuminanceFunctions().round(data.getLuminanceScaleData().getLuminanceForBrightness()[currentlyDisplayedStimulus.getEvaluatedBrightnessThreshold()], 2));
+                stimulusResults.setStimulusLuminanceThreshold(data.getScreenLuminanceFunctions().round(data.getLuminanceScaleDataForStimuli().getLuminanceForBrightness()[currentlyDisplayedStimulus.getEvaluatedBrightnessThreshold()], 2));
                 stimuliAnswers.add(stimulusResults);
 
                 if (activeStimuliIndices.size() == 0) {
@@ -491,7 +500,7 @@ public class MainProcedure extends Stage {
 
     public int whatBrightnessStimulusShouldHave(int[] answers) {
 
-        int brightnessIndex = 5; // the middle one
+        int brightnessIndex = visualFieldTestBrightnessVectorLength / 2; // the middle one
 
         int currentAnswer;
         int lastAnswer = answers[0];
@@ -503,14 +512,14 @@ public class MainProcedure extends Stage {
             } else {
                 switch (answers[i]) {
                     case 1:
-                        if ((brightnessIndex != 1 && brightnessIndex != 9) && currentAnswer == lastAnswer) {
+                        if ((brightnessIndex != 1 && brightnessIndex != (visualFieldTestBrightnessVectorLength - 2)) && currentAnswer == lastAnswer) {
                             brightnessIndex += 2;
                         } else {
                             brightnessIndex += 1;
                         }
                         break;
                     case 2:
-                        if ((brightnessIndex != 1 && brightnessIndex != 9) && currentAnswer == lastAnswer) {
+                        if ((brightnessIndex != 1 && brightnessIndex != (visualFieldTestBrightnessVectorLength - 2)) && currentAnswer == lastAnswer) {
                             brightnessIndex -= 2;
                         } else {
                             brightnessIndex -= 1;
@@ -532,8 +541,8 @@ public class MainProcedure extends Stage {
 
         // Ustawienie warto�ci jasno�ci na podstawie dotychczas udzielonych odpowiedzi.
         int brightnessLevel = whatBrightnessStimulusShouldHave(currentlyDisplayedStimulus.getStimulusAnswers());
-        Color newColor = Color.hsb(Integer.valueOf(data.getLuminanceScaleData().getScaleHue()),
-                Double.valueOf(data.getLuminanceScaleData().getScaleSaturation()) / 100,
+        Color newColor = Color.hsb(Integer.valueOf(data.getLuminanceScaleDataForStimuli().getScaleHue()),
+                Double.valueOf(data.getLuminanceScaleDataForStimuli().getScaleSaturation()) / 100,
                 Double.valueOf(brightnessLevel) / 100);
         currentlyDisplayedStimulus.getStimulusShape().setFill(newColor);
         currentlyDisplayedStimulus.getStimulusShape().setStroke(newColor);
@@ -617,8 +626,8 @@ public class MainProcedure extends Stage {
                 }
                 fixationMonitorShape = new Ellipse(centerX + blindspotDistanceX, centerY + blindspotDistanceY, radiusX, radiusY);
 
-                Color fixationMonitorStimulusColor = Color.hsb(Integer.valueOf(data.getLuminanceScaleData().getScaleHue()),
-                        Double.valueOf(data.getLuminanceScaleData().getScaleSaturation()) / 100,
+                Color fixationMonitorStimulusColor = Color.hsb(Integer.valueOf(data.getLuminanceScaleDataForStimuli().getScaleHue()),
+                        Double.valueOf(data.getLuminanceScaleDataForStimuli().getScaleSaturation()) / 100,
                         Double.valueOf(data.getMonitorStimulusBrightness()) / 100);
                 fixationMonitorShape.setFill(fixationMonitorStimulusColor);
                 fixationMonitorShape.setStroke(fixationMonitorStimulusColor);
@@ -757,70 +766,39 @@ public class MainProcedure extends Stage {
         shellWindowForMainProcedure.addTextToTextArea("Patient distance (mm):" + "\t" + data.getPatientDistanceInMm() + "\n");
         shellWindowForMainProcedure.addTextToTextArea("Involved visual field (\u00B0):" + "\t" + data.getVisualFieldX() + "\t" + data.getVisualFieldY() + "\n\n");
 
-        shellWindowForMainProcedure.addTextToTextArea("LUMINANCE SCALE INFO" + "\n");
-        shellWindowForMainProcedure.addTextToTextArea("ID:" + "\t" + data.getLuminanceScaleData().getScaleID() + "\n");
-        shellWindowForMainProcedure.addTextToTextArea("Name:" + "\t" + data.getLuminanceScaleData().getScaleName() + "\n");
-        shellWindowForMainProcedure.addTextToTextArea("Luminance measurements (cd/m2) for given brightness (%)" + "\n");
-        shellWindowForMainProcedure.addTextToTextArea("B0:" + "\t" + data.getLuminanceScaleData().getScaleB0() + "\n");
-        shellWindowForMainProcedure.addTextToTextArea("B20:" + "\t" + data.getLuminanceScaleData().getScaleB20() + "\n");
-        shellWindowForMainProcedure.addTextToTextArea("B40:" + "\t" + data.getLuminanceScaleData().getScaleB40() + "\n");
-        shellWindowForMainProcedure.addTextToTextArea("B60:" + "\t" + data.getLuminanceScaleData().getScaleB60() + "\n");
-        shellWindowForMainProcedure.addTextToTextArea("B80:" + "\t" + data.getLuminanceScaleData().getScaleB80() + "\n");
-        shellWindowForMainProcedure.addTextToTextArea("B100:" + "\t" + data.getLuminanceScaleData().getScaleB100() + "\n");
-        double[] luminanceFitted = new double[] {
-                data.getLuminanceScaleData().getLuminanceForBrightness()[0],
-                data.getLuminanceScaleData().getLuminanceForBrightness()[20],
-                data.getLuminanceScaleData().getLuminanceForBrightness()[40],
-                data.getLuminanceScaleData().getLuminanceForBrightness()[60],
-                data.getLuminanceScaleData().getLuminanceForBrightness()[80],
-                data.getLuminanceScaleData().getLuminanceForBrightness()[100]
-        };
-        double[] difference = new double[data.getLuminanceScaleData().getLuminanceMeasurements().length];
-        for (int i = 0; i < data.getLuminanceScaleData().getLuminanceMeasurements().length; i++) {
-            difference[i] = data.getScreenLuminanceFunctions().round(data.getLuminanceScaleData().getLuminanceMeasurements()[i] - luminanceFitted[i], 2);
-        }
-        DescriptiveStatistics descriptiveStatistics = new DescriptiveStatistics();
-        for (int i = 0; i < difference.length; i++) {
-            descriptiveStatistics.addValue(difference[i]);
-        }
-        double std = data.getScreenLuminanceFunctions().round(descriptiveStatistics.getStandardDeviation(), 2);
-        shellWindowForMainProcedure.addTextToTextArea("STD:" + "\t" + std + "\n\n");
+        shellWindowForMainProcedure.addTextToTextArea("LUMINANCE SCALE FOR STIMULI INFO" + "\n");
+        shellWindowForMainProcedure.addTextToTextArea("ID:" + "\t" + data.getLuminanceScaleDataForStimuli().getScaleID() + "\n");
+        shellWindowForMainProcedure.addTextToTextArea("Name:" + "\t" + data.getLuminanceScaleDataForStimuli().getScaleName() + "\n\n");
 
-        double maxPossibleLuminance = data.getScreenLuminanceFunctions().round(data.getLuminanceScaleData().getLuminanceForBrightness()[100], 2);
-        double luminanceForBackgroundBrightness = data.getScreenLuminanceFunctions().round(data.getLuminanceScaleData().getLuminanceForBrightness()[data.getBackgroundBrightness()], 2);
-        double luminanceForBackgroundBrightnessPlusOne = data.getScreenLuminanceFunctions().round(data.getLuminanceScaleData().getLuminanceForBrightness()[data.getBackgroundBrightness() + 1], 2);
-        double dbRangeMin = data.getScreenLuminanceFunctions().decibelsValue(maxPossibleLuminance, maxPossibleLuminance, luminanceForBackgroundBrightness, 2);
-        double dbRangeMax = data.getScreenLuminanceFunctions().decibelsValue(maxPossibleLuminance, luminanceForBackgroundBrightnessPlusOne, luminanceForBackgroundBrightness, 2);
-
-        shellWindowForMainProcedure.addTextToTextArea("L_Ref (maximum possible luminance [cd/m2]):" + "\t" + data.getScreenLuminanceFunctions().round(data.getLuminanceScaleData().getLuminanceForBrightness()[100], 2) + "\n");
-        shellWindowForMainProcedure.addTextToTextArea("L_B (background luminance [cd/m2]):" + "\t" + data.getScreenLuminanceFunctions().round(data.getLuminanceScaleData().getLuminanceForBrightness()[data.getBackgroundBrightness()], 2) + "\n");
-        shellWindowForMainProcedure.addTextToTextArea("Decibel (dB) scale range:" + "\t" + dbRangeMin + "\t" + dbRangeMax + "\n\n");
+        shellWindowForMainProcedure.addTextToTextArea("LUMINANCE SCALE FOR BACKGROUND INFOR" + "\n");
+        shellWindowForMainProcedure.addTextToTextArea("ID:" + "\t" + data.getLuminanceScaleDataForBackground().getScaleID() + "\n");
+        shellWindowForMainProcedure.addTextToTextArea("Name:" + "\t" + data.getLuminanceScaleDataForBackground().getScaleName() + "\n\n");
 
         shellWindowForMainProcedure.addTextToTextArea("STIMULUS INFO" + "\n");
         shellWindowForMainProcedure.addTextToTextArea("Max brightness (%):" + "\t" + data.getStimulusMaxBrightness() + "\n");
-        shellWindowForMainProcedure.addTextToTextArea("Max luminance(cd/m2):" + "\t" + data.getScreenLuminanceFunctions().round(data.getLuminanceScaleData().getLuminanceForBrightness()[data.getStimulusMaxBrightness()], 2) + "\n");
+        shellWindowForMainProcedure.addTextToTextArea("Max luminance(cd/m2):" + "\t" + data.getScreenLuminanceFunctions().round(data.getLuminanceScaleDataForStimuli().getLuminanceForBrightness()[data.getStimulusMaxBrightness()], 2) + "\n");
+        shellWindowForMainProcedure.addTextToTextArea("Min brightness (%):" + "\t" + data.getStimulusMinBrightness() + "\n");
+        shellWindowForMainProcedure.addTextToTextArea("Min luminance(cd/m2):" + "\t" + data.getScreenLuminanceFunctions().round(data.getLuminanceScaleDataForStimuli().getLuminanceForBrightness()[data.getStimulusMinBrightness()], 2) + "\n");
         shellWindowForMainProcedure.addTextToTextArea("Shape:" + "\t" + data.getStimulusShape() + "\n");
         shellWindowForMainProcedure.addTextToTextArea("Inclination (\u00B0):" + "\t" + data.getStimulusInclination() + "\n");
         shellWindowForMainProcedure.addTextToTextArea("Size (\u00B0):" + "\t" + data.getStimulusWidthInDegrees() + "\t" + data.getStimulusHeightInDegrees() + "\n");
         shellWindowForMainProcedure.addTextToTextArea("Display time (ms):" + "\t" + data.getStimulusDisplayTime() + "\n");
-        shellWindowForMainProcedure.addTextToTextArea("Interval between stimuli (ms):" + "\n");
-        shellWindowForMainProcedure.addTextToTextArea("Constant part:" + "\t" + data.getTimeIntervalBetweenStimuliConstantPart() + "\n");
-        shellWindowForMainProcedure.addTextToTextArea("Random part:" + "\t" + data.getTimeIntervalBetweenStimuliRandomPart() + "\n");
-        shellWindowForMainProcedure.addTextToTextArea("Distance between stimuli (\u00B0):" + "\n");
-        shellWindowForMainProcedure.addTextToTextArea("Horizontally:" + "\t" + data.getDistanceBetweenStimuliHorizontally() + "\n");
-        shellWindowForMainProcedure.addTextToTextArea("Vertically:" + "\t" + data.getDistanceBetweenStimuliVertically() + "\n\n");
+        shellWindowForMainProcedure.addTextToTextArea("Inter-stimuli interval - constant part (ms):" + "\t" + data.getTimeIntervalBetweenStimuliConstantPart() + "\n");
+        shellWindowForMainProcedure.addTextToTextArea("Inter-stimuli interval - random part (ms):" + "\t" + data.getTimeIntervalBetweenStimuliRandomPart() + "\n");
+        shellWindowForMainProcedure.addTextToTextArea("Horizontal and vertical distance between stimuli (\u00B0):" + "\t" + data.getDistanceBetweenStimuliHorizontally() + "\t" + data.getDistanceBetweenStimuliVertically() + "\n\n");
 
         shellWindowForMainProcedure.addTextToTextArea("BACKGROUND INFO" + "\n");
         shellWindowForMainProcedure.addTextToTextArea("Brightness (%):" + "\t" + data.getBackgroundBrightness() + "\n");
-        shellWindowForMainProcedure.addTextToTextArea("Luminance (cd/m2):" + "\t" + data.getScreenLuminanceFunctions().round(data.getLuminanceScaleData().getLuminanceForBrightness()[data.getBackgroundBrightness()], 2) + "\n");
-        shellWindowForMainProcedure.addTextToTextArea("Grid resolution:" + "\t" + data.getQuarterGridResolutionX() + "\t" + data.getQuarterGridResolutionY() + "\n\n");
+        shellWindowForMainProcedure.addTextToTextArea("Luminance (cd/m2):" + "\t" + data.getScreenLuminanceFunctions().round(data.getLuminanceScaleDataForBackground().getLuminanceForBrightness()[data.getBackgroundBrightness()], 2) + "\n");
+        shellWindowForMainProcedure.addTextToTextArea("Grid resolution (XY):" + "\t" + data.getQuarterGridResolutionX() + "\t" + data.getQuarterGridResolutionY() + "\n\n");
 
         shellWindowForMainProcedure.addTextToTextArea("FIXATION POINT INFO" + "\n");
         shellWindowForMainProcedure.addTextToTextArea("Hue:" + "\t" + data.getFixPointHue() + "\n");
         shellWindowForMainProcedure.addTextToTextArea("Saturation:" + "\t" + data.getFixPointSaturation() + "\n");
         shellWindowForMainProcedure.addTextToTextArea("Brightness:" + "\t" + data.getFixPointBrightness() + "\n");
-        shellWindowForMainProcedure.addTextToTextArea("Measured luminance (cd/m2):" + "\t" + data.getLuminanceScaleData().getFixationPointMeasuredLuminance() + "\n");
-        shellWindowForMainProcedure.addTextToTextArea("Size (\u00B0):" + "\t" + data.getFixPointWidth() + "\t" + data.getFixPointHeight() + "\n\n");
+        shellWindowForMainProcedure.addTextToTextArea("Measured luminance (cd/m2):" + "\t" + data.getLuminanceScaleDataForStimuli().getFixationPointMeasuredLuminance() + "\n");
+        shellWindowForMainProcedure.addTextToTextArea("Width (\u00B0):" + "\t" + data.getFixPointWidth() + "\n");
+        shellWindowForMainProcedure.addTextToTextArea("Height (\u00B0):" + "\t" + data.getFixPointHeight() + "\n\n");
 
         shellWindowForMainProcedure.addTextToTextArea("FIXATION MONITOR INFO" + "\n");
         if (data.getFixationMonitor().equals("None")) {
@@ -840,7 +818,7 @@ public class MainProcedure extends Stage {
             shellWindowForMainProcedure.addTextToTextArea("Width (\u00B0):" + "\t" + data.getMonitorStimulusWidth() +"\n");
             shellWindowForMainProcedure.addTextToTextArea("Height (\u00B0):" + "\t" + data.getMonitorStimulusHeight() + "\n");
             shellWindowForMainProcedure.addTextToTextArea("Brightness (%):" + "\t" + data.getMonitorStimulusBrightness() + "\n");
-            shellWindowForMainProcedure.addTextToTextArea("Luminance (cd/m2):" + "\t" + data.getScreenLuminanceFunctions().round(data.getLuminanceScaleData().getLuminanceForBrightness()[(int) data.getMonitorStimulusBrightness()], 2) + "\n\n");
+            shellWindowForMainProcedure.addTextToTextArea("Luminance (cd/m2):" + "\t" + data.getScreenLuminanceFunctions().round(data.getLuminanceScaleDataForStimuli().getLuminanceForBrightness()[(int) data.getMonitorStimulusBrightness()], 2) + "\n\n");
 
         } else {
             shellWindowForMainProcedure.addTextToTextArea("Fixation monitor:" + "\t" + data.getFixationMonitor() + "\n");
@@ -856,7 +834,7 @@ public class MainProcedure extends Stage {
             shellWindowForMainProcedure.addTextToTextArea("Hue:" + "\t" + data.getFixPointChangeHue() + "\n");
             shellWindowForMainProcedure.addTextToTextArea("Saturation:" + "\t" + data.getFixPointChangeSaturation() + "\n");
             shellWindowForMainProcedure.addTextToTextArea("Brightness:" + "\t" + data.getFixPointChangeBrightness() + "\n");
-            shellWindowForMainProcedure.addTextToTextArea("Luminance (cd/m2):" + "\t" + data.getLuminanceScaleData().getFixationPointChangeMeasuredLuminance() + "\n\n");
+            shellWindowForMainProcedure.addTextToTextArea("Luminance (cd/m2):" + "\t" + data.getLuminanceScaleDataForStimuli().getFixationPointChangeMeasuredLuminance() + "\n\n");
         }
 
         shellWindowForMainProcedure.addTextToTextArea("KEYS INFO" + "\n");
@@ -866,6 +844,5 @@ public class MainProcedure extends Stage {
 
         shellWindowForMainProcedure.addTextToTextArea("RESULTS (STIMULI THRESHOLDS)" + "\n");
         shellWindowForMainProcedure.addTextToTextArea("id" + "\t" + "%" + "\t" + "cd/m2" + "\t" + "dB" + "\n");
-
     }
 }

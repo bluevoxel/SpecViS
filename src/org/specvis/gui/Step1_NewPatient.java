@@ -24,7 +24,7 @@ import java.time.format.DateTimeFormatter;
 
 /**
  * Created by pdzwiniel on 2015-05-25.
- * Last update by pdzwiniel on 2015-11-03.
+ * Last update by pdzwiniel on 2015-11-12.
  */
 
 /*
@@ -78,6 +78,7 @@ public class Step1_NewPatient extends Stage {
         ComboBox cbGender = new ComboBox(olGender);
         cbGender.getSelectionModel().select(0);
         cbGender.setMinHeight(minHeight);
+        cbGender.setMaxWidth(Double.MAX_VALUE);
 
         Label labelFirstName = new Label("First name:");
         labelFirstName.setMinHeight(minHeight);

@@ -20,7 +20,7 @@ import java.util.List;
 
 /**
  * Created by pdzwiniel on 2015-06-10.
- * Last update by pdzwiniel on 2015-11-03.
+ * Last update by pdzwiniel on 2015-11-12.
  */
 
 /*
@@ -74,8 +74,8 @@ public class PreviewStimuliDistribution extends Stage {
         fixationMonitor = data.getFixationMonitor();
         blindspotDistFromFixPointHorizontally = data.getBlindspotDistanceFromFixPointHorizontally();
         blindspotDistFromFixPointVertically = data.getBlindspotDistanceFromFixPointVertically();
-        backgroundHue = Integer.valueOf(data.getLuminanceScaleData().getScaleHue());
-        backgroundSaturation = Integer.valueOf(data.getLuminanceScaleData().getScaleSaturation());
+        backgroundHue = Integer.valueOf(data.getLuminanceScaleDataForBackground().getScaleHue());
+        backgroundSaturation = Integer.valueOf(data.getLuminanceScaleDataForBackground().getScaleSaturation());
         backgroundBrightness = data.getBackgroundBrightness();
 
         /* layout */

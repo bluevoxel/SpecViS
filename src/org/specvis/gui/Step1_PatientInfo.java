@@ -26,7 +26,7 @@ import java.util.ArrayList;
 
 /**
  * Created by pdzwiniel on 2015-05-25.
- * Last update by pdzwiniel on 2015-11-03.
+ * Last update by pdzwiniel on 2015-11-12.
  */
 
 /*
@@ -84,6 +84,7 @@ public class Step1_PatientInfo extends Stage {
         ComboBox cbGender = new ComboBox(olGender);
         cbGender.getSelectionModel().select(patientInfo.getPatientGender());
         cbGender.setMinHeight(minHeight);
+        cbGender.setMaxWidth(Double.MAX_VALUE);
 
         Label labelFirstName = new Label("First name:");
         labelFirstName.setMinHeight(minHeight);

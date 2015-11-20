@@ -34,6 +34,7 @@ import java.util.ArrayList;
 
 /**
  * Created by pdzwiniel on 2015-10-03.
+ * Last update by pdzwiniel on 2015-11-12.
  */
 
 /*
@@ -78,9 +79,9 @@ public class ShowResultsAsVisualFieldMap extends Stage {
     public Parent createContent() {
 
         /* init some data */
-        lowestStimuliLuminance = data.getScreenLuminanceFunctions().round(data.getLuminanceScaleData().getLuminanceForBrightness()[data.getStimuliVerifiedBrightnessValues()[0]], 2);
-        backgroundLuminance = data.getScreenLuminanceFunctions().round(data.getLuminanceScaleData().getLuminanceForBrightness()[data.getBackgroundBrightness()], 2);
-        maxPossibleLuminance = data.getScreenLuminanceFunctions().round(data.getLuminanceScaleData().getLuminanceForBrightness()[100], 2);
+        lowestStimuliLuminance = data.getScreenLuminanceFunctions().round(data.getLuminanceScaleDataForStimuli().getLuminanceForBrightness()[data.getStimuliVerifiedBrightnessValues()[0]], 2);
+        backgroundLuminance = data.getScreenLuminanceFunctions().round(data.getLuminanceScaleDataForBackground().getLuminanceForBrightness()[data.getBackgroundBrightness()], 2);
+        maxPossibleLuminance = data.getScreenLuminanceFunctions().round(data.getLuminanceScaleDataForStimuli().getLuminanceForBrightness()[100], 2);
 
         /* layout */
         BorderPane layout = new BorderPane();
@@ -320,7 +321,6 @@ public class ShowResultsAsVisualFieldMap extends Stage {
                 Line lineHorizontal = new Line(0, i * spaceY, displayPane.getMaxWidth(), i * spaceY);
                 displayPane.getChildren().add(lineHorizontal);
             }
-
         }
 
         /* DRAW DISTANCE MARKERS */

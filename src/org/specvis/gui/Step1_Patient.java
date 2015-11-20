@@ -99,7 +99,7 @@ public class Step1_Patient extends Stage {
         textFieldChosenPatientID.setEditable(false);
         textFieldChosenPatientID.setStyle("-fx-background-color: rgb(215,215,215)");
 
-        Button buttonInfo = new Button("?");
+        Button buttonInfo = new Button("Edit");
         buttonInfo.setOnAction(event1 -> {
             if (!textFieldChosenPatientID.getText().equals("")) {
                 Step1_PatientInfo stage = new Step1_PatientInfo(this);

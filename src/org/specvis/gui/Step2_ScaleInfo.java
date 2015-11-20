@@ -10,7 +10,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import org.specvis.data.ConfigurationData;
 import org.specvis.data.LuminanceScaleData;
@@ -22,7 +21,7 @@ import java.util.ArrayList;
 
 /**
  * Created by pdzwiniel on 2015-05-28.
- * Last update by pdzwiniel on 2015-11-03.
+ * Last update by pdzwiniel on 2015-11-12.
  */
 
 /*
@@ -47,7 +46,9 @@ import java.util.ArrayList;
 
 public class Step2_ScaleInfo extends Stage {
 
-    private Step2_LuminanceScaleAndScreen step2_LuminanceScaleAndScreen;
+    private String scaleType; // "Stimulus" or "Background".
+
+    private Step2_ScreenAndLuminanceScale step2_ScreenAndLuminanceScale;
     private LuminanceScaleData luminanceScaleData;
 
     private Label labelColor;
@@ -64,7 +65,14 @@ public class Step2_ScaleInfo extends Stage {
         ScreenLuminanceFunctions screenLuminanceFunctions = new ScreenLuminanceFunctions();
 
         /* init data */
-        luminanceScaleData = step2_LuminanceScaleAndScreen.getLuminanceScaleData();
+        switch (scaleType) {
+            case "Stimulus":
+                luminanceScaleData = step2_ScreenAndLuminanceScale.getLuminanceScaleDataForStimuli();
+                break;
+            case "Background":
+                luminanceScaleData = step2_ScreenAndLuminanceScale.getLuminanceScaleDataForBackground();
+                break;
+        }
 
         /* layout */
         BorderPane layout = new BorderPane();
@@ -279,21 +287,35 @@ public class Step2_ScaleInfo extends Stage {
 
             if (!check) {
                 if (!textFieldScaleName.getText().equals("")) {
-                    step2_LuminanceScaleAndScreen.getTextFieldScreenLuminanceScale().setText(textFieldScaleName.getText());
 
-                    step2_LuminanceScaleAndScreen.getTextFieldB0().setText(spinnerB0.getValue().toString());
-                    step2_LuminanceScaleAndScreen.getTextFieldB20().setText(spinnerB20.getValue().toString());
-                    step2_LuminanceScaleAndScreen.getTextFieldB40().setText(spinnerB40.getValue().toString());
-                    step2_LuminanceScaleAndScreen.getTextFieldB60().setText(spinnerB60.getValue().toString());
-                    step2_LuminanceScaleAndScreen.getTextFieldB80().setText(spinnerB80.getValue().toString());
-                    step2_LuminanceScaleAndScreen.getTextFieldB100().setText(spinnerB100.getValue().toString());
+                    switch (scaleType) {
+                        case "Stimulus":
+                            step2_ScreenAndLuminanceScale.getTextFieldStimulusScaleName().setText(textFieldScaleName.getText());
+                            break;
+                        case "Background":
+                            step2_ScreenAndLuminanceScale.getTextFieldBackgroundScaleName().setText(textFieldScaleName.getText());
+                            break;
+                    }
 
                     String textForEmptyFields = "#";
                     if (textAreaAdditionalInformation.getText().equals("")) {
                         textAreaAdditionalInformation.setText(textForEmptyFields);
                     }
 
-                    LuminanceScaleData luminanceScaleData = step2_LuminanceScaleAndScreen.getLuminanceScaleData();
+                    LuminanceScaleData luminanceScaleData;
+
+                    switch (scaleType) {
+                        case "Stimulus":
+                            luminanceScaleData = step2_ScreenAndLuminanceScale.getLuminanceScaleDataForStimuli();
+                            break;
+                        case "Background":
+                            luminanceScaleData = step2_ScreenAndLuminanceScale.getLuminanceScaleDataForBackground();
+                            break;
+                        default:
+                            luminanceScaleData = new LuminanceScaleData();
+                            break;
+                    }
+
                     luminanceScaleData.setScaleID(textFieldID.getText());
                     luminanceScaleData.setScaleName(textFieldScaleName.getText());
                     luminanceScaleData.setScaleHue(spinnerHue.getValue().toString());
@@ -392,8 +414,9 @@ public class Step2_ScaleInfo extends Stage {
         return layout;
     }
 
-    public Step2_ScaleInfo(Step2_LuminanceScaleAndScreen step2_LuminanceScaleAndScreen) {
-        this.step2_LuminanceScaleAndScreen = step2_LuminanceScaleAndScreen;
+    public Step2_ScaleInfo(Step2_ScreenAndLuminanceScale step2_ScreenAndLuminanceScale, String scaleType) {
+        this.step2_ScreenAndLuminanceScale = step2_ScreenAndLuminanceScale;
+        this.scaleType = scaleType;
         this.setScene(new Scene(createContent()));
         this.setTitle("Specvis");
         this.getIcons().add(new Image("/org/specvis/graphics/SpecvisIcon.png"));

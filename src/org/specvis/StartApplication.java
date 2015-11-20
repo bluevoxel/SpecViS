@@ -21,7 +21,7 @@ import java.util.ArrayList;
 
 /**
  * Created by pdzwiniel on 2015-05-20.
- * Last update by pdzwiniel on 2015-11-03.
+ * Last update by pdzwiniel on 2015-11-20.
  */
 
 /*
@@ -48,7 +48,7 @@ public class StartApplication extends Application {
 
     private Data data;
     private Step1_Patient stageStep1Patient;
-    private Step2_LuminanceScaleAndScreen stageStep2ScreenAndLuminance;
+    private Step2_ScreenAndLuminanceScale stageStep2ScreenAndLuminance;
     private Step3_StimulusAndBackground stageStep3Stimulus;
     private Step4_FixationAndOther stageStep4General;
 
@@ -64,7 +64,7 @@ public class StartApplication extends Application {
 
         /* initialize specvis settings windows */
         stageStep1Patient = new Step1_Patient(this);
-        stageStep2ScreenAndLuminance = new Step2_LuminanceScaleAndScreen(this);
+        stageStep2ScreenAndLuminance = new Step2_ScreenAndLuminanceScale(this);
         stageStep3Stimulus = new Step3_StimulusAndBackground(this);
         stageStep4General = new Step4_FixationAndOther(this);
 
@@ -93,7 +93,7 @@ public class StartApplication extends Application {
         );
         labelSpecvisLogo.setPrefSize(720, 270);
 
-        Label labelCopyright = new Label("Copyright \u00a9 2014-2015 Piotr Dzwiniel" + "\n" + "Version 0.2.1");
+        Label labelCopyright = new Label("Copyright \u00a9 2014-2015 Piotr Dzwiniel" + "\n" + "Version 0.2.2");
         labelCopyright.setStyle("-fx-font-size: 14px;");
         labelCopyright.setLayoutX(5);
         labelCopyright.setLayoutY(5);
@@ -128,7 +128,7 @@ public class StartApplication extends Application {
         return stageStep1Patient;
     }
 
-    public Step2_LuminanceScaleAndScreen getStageStep2ScreenAndLuminance() {
+    public Step2_ScreenAndLuminanceScale getStageStep2ScreenAndLuminance() {
         return stageStep2ScreenAndLuminance;
     }
 
@@ -166,37 +166,39 @@ public class StartApplication extends Application {
         ConfigurationData.setScreenHeight(configurationValues.get(3));
         ConfigurationData.setPatientDistance(configurationValues.get(4));
         ConfigurationData.setStimulusMaxBrightness(configurationValues.get(5));
-        ConfigurationData.setStimulusShape(configurationValues.get(6));
-        ConfigurationData.setStimulusInclination(configurationValues.get(7));
-        ConfigurationData.setStimulusWidth(configurationValues.get(8));
-        ConfigurationData.setStimulusHeight(configurationValues.get(9));
-        ConfigurationData.setStimulusDisplayTime(configurationValues.get(10));
-        ConfigurationData.setConstantPartOfIntervalBetweenStimuli(configurationValues.get(11));
-        ConfigurationData.setRandomPartOfIntervalBetweenStimuli(configurationValues.get(12));
-        ConfigurationData.setBackgroundBrightness(configurationValues.get(13));
-        ConfigurationData.setQuarterGridResolutionX(configurationValues.get(14));
-        ConfigurationData.setQuarterGridResolutionY(configurationValues.get(15));
-        ConfigurationData.setFixationPointColor(configurationValues.get(16));
-        ConfigurationData.setFixationPointWidth(configurationValues.get(17));
-        ConfigurationData.setFixationPointHeight(configurationValues.get(18));
-        ConfigurationData.setAnswerToStimulusKey(configurationValues.get(19));
-        ConfigurationData.setPauseProcedureKey(configurationValues.get(20));
-        ConfigurationData.setCancelProcedureKey(configurationValues.get(21));
-        ConfigurationData.setFixationMonitor(configurationValues.get(22));
-        ConfigurationData.setFixationCheckRate(configurationValues.get(23));
-        ConfigurationData.setBlindspotDistanceFromFixationPointHorizontally(configurationValues.get(24));
-        ConfigurationData.setBlindspotDistanceFromFixationPointVertically(configurationValues.get(25));
-        ConfigurationData.setMonitorStimulusWidth(configurationValues.get(26));
-        ConfigurationData.setMonitorStimulusHeight(configurationValues.get(27));
-        ConfigurationData.setMonitorStimulusBrightness(configurationValues.get(28));
-        ConfigurationData.setFixationPointChangeWidth(configurationValues.get(29));
-        ConfigurationData.setFixationPointChangeHeight(configurationValues.get(30));
-        ConfigurationData.setFixationPointChangeColor(configurationValues.get(31));
-        ConfigurationData.setBlindspotMappingRangeHorizontally_1(configurationValues.get(32));
-        ConfigurationData.setBlindspotMappingRangeHorizontally_2(configurationValues.get(33));
-        ConfigurationData.setBlindspotMappingRangeVertically_1(configurationValues.get(34));
-        ConfigurationData.setBlindspotMappingRangeVertically_2(configurationValues.get(35));
-        ConfigurationData.setBlindspotMappingStimulusDisplayRepetitions(configurationValues.get(36));
-        ConfigurationData.setBlindspotMappingAccuracy(configurationValues.get(37));
+        ConfigurationData.setStimulusMinBrightness(configurationValues.get(6));
+        ConfigurationData.setStimulusShape(configurationValues.get(7));
+        ConfigurationData.setStimulusInclination(configurationValues.get(8));
+        ConfigurationData.setStimulusWidth(configurationValues.get(9));
+        ConfigurationData.setStimulusHeight(configurationValues.get(10));
+        ConfigurationData.setStimulusDisplayTime(configurationValues.get(11));
+        ConfigurationData.setConstantPartOfIntervalBetweenStimuli(configurationValues.get(12));
+        ConfigurationData.setRandomPartOfIntervalBetweenStimuli(configurationValues.get(13));
+        ConfigurationData.setBackgroundBrightness(configurationValues.get(14));
+        ConfigurationData.setQuarterGridResolutionX(configurationValues.get(15));
+        ConfigurationData.setQuarterGridResolutionY(configurationValues.get(16));
+        ConfigurationData.setFixationPointColor(configurationValues.get(17));
+        ConfigurationData.setFixationPointWidth(configurationValues.get(18));
+        ConfigurationData.setFixationPointHeight(configurationValues.get(19));
+        ConfigurationData.setAnswerToStimulusKey(configurationValues.get(20));
+        ConfigurationData.setPauseProcedureKey(configurationValues.get(21));
+        ConfigurationData.setCancelProcedureKey(configurationValues.get(22));
+        ConfigurationData.setFixationMonitor(configurationValues.get(23));
+        ConfigurationData.setFixationCheckRate(configurationValues.get(24));
+        ConfigurationData.setBlindspotDistanceFromFixationPointHorizontally(configurationValues.get(25));
+        ConfigurationData.setBlindspotDistanceFromFixationPointVertically(configurationValues.get(26));
+        ConfigurationData.setMonitorStimulusWidth(configurationValues.get(27));
+        ConfigurationData.setMonitorStimulusHeight(configurationValues.get(28));
+        ConfigurationData.setMonitorStimulusBrightness(configurationValues.get(29));
+        ConfigurationData.setFixationPointChangeWidth(configurationValues.get(30));
+        ConfigurationData.setFixationPointChangeHeight(configurationValues.get(31));
+        ConfigurationData.setFixationPointChangeColor(configurationValues.get(32));
+        ConfigurationData.setBlindspotMappingRangeHorizontally_1(configurationValues.get(33));
+        ConfigurationData.setBlindspotMappingRangeHorizontally_2(configurationValues.get(34));
+        ConfigurationData.setBlindspotMappingRangeVertically_1(configurationValues.get(35));
+        ConfigurationData.setBlindspotMappingRangeVertically_2(configurationValues.get(36));
+        ConfigurationData.setBlindspotMappingStimulusDisplayRepetitions(configurationValues.get(37));
+        ConfigurationData.setBlindspotMappingAccuracy(configurationValues.get(38));
+        ConfigurationData.setVisualFieldTestBrightnessVectorLength(configurationValues.get(39));
     }
 }
