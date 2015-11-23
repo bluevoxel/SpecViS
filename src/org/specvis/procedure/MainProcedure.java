@@ -770,7 +770,7 @@ public class MainProcedure extends Stage {
         shellWindowForMainProcedure.addTextToTextArea("ID:" + "\t" + data.getLuminanceScaleDataForStimuli().getScaleID() + "\n");
         shellWindowForMainProcedure.addTextToTextArea("Name:" + "\t" + data.getLuminanceScaleDataForStimuli().getScaleName() + "\n\n");
 
-        shellWindowForMainProcedure.addTextToTextArea("LUMINANCE SCALE FOR BACKGROUND INFOR" + "\n");
+        shellWindowForMainProcedure.addTextToTextArea("LUMINANCE SCALE FOR BACKGROUND INFO" + "\n");
         shellWindowForMainProcedure.addTextToTextArea("ID:" + "\t" + data.getLuminanceScaleDataForBackground().getScaleID() + "\n");
         shellWindowForMainProcedure.addTextToTextArea("Name:" + "\t" + data.getLuminanceScaleDataForBackground().getScaleName() + "\n\n");
 

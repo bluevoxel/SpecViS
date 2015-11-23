@@ -374,7 +374,7 @@ public class ShowResultsAsVisualFieldMap extends Stage {
             double distanceY;
             if (data.getExaminedEye().equals("Right")) {
                 distanceX = pixelsForOneDegreeX * data.getBlindspotDistanceFromFixPointHorizontally();
-                distanceY = pixelsForOneDegreeY * data.getBlindspotDistanceFromFixPointVertically();
+                distanceY = pixelsForOneDegreeY * (-data.getBlindspotDistanceFromFixPointVertically());
             } else {
                 distanceX = pixelsForOneDegreeX * (-data.getBlindspotDistanceFromFixPointHorizontally());
                 distanceY = pixelsForOneDegreeY * (-data.getBlindspotDistanceFromFixPointVertically());
