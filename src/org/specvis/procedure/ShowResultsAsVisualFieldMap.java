@@ -34,7 +34,7 @@ import java.util.ArrayList;
 
 /**
  * Created by pdzwiniel on 2015-10-03.
- * Last update by pdzwiniel on 2015-11-12.
+ * Last update by pdzwiniel on 2015-12-21.
  */
 
 /*
@@ -420,7 +420,12 @@ public class ShowResultsAsVisualFieldMap extends Stage {
                         int[] stimulusGridCoordinatesXY = stimulusResultsArrayList.get(i).getStimulusGridCoordinatesXY();
                         double stimulusLuminance = stimulusResultsArrayList.get(i).getStimulusLuminanceThreshold();
                         int round = 2;
-                        double decibels = data.getScreenLuminanceFunctions().decibelsValue(maxPossibleLuminance, stimulusLuminance, backgroundLuminance, round);
+                        double decibels;
+                        if (stimulusLuminance == -1) {
+                            decibels = stimulusLuminance;
+                        } else {
+                            decibels = data.getScreenLuminanceFunctions().decibelsValue(maxPossibleLuminance, stimulusLuminance, backgroundLuminance, round);
+                        }
                         Label labelValue = new Label(String.valueOf(decibels));
                         labelValue.setMinSize(spaceX, spaceY);
                         labelValue.setLayoutX(spaceX * stimulusGridCoordinatesXY[0]);
@@ -469,6 +474,10 @@ public class ShowResultsAsVisualFieldMap extends Stage {
         double scaleRange = maxScaleValue - minScaleValue;
         double normalizedValue = value - minScaleValue;
         double finalBrightness = 1.0 * (normalizedValue / scaleRange);
-        return Color.hsb(0, 0.0, 1.0 - finalBrightness);
+        if (value == -1) {
+            return Color.hsb(0, 0.0, 0.0);
+        } else {
+            return Color.hsb(0, 0.0, 1.0 - finalBrightness);
+        }
     }
 }

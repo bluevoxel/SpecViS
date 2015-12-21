@@ -5,7 +5,7 @@ screenHeight=300;
 patientDistance=460;
 stimulusMaxBrightness=100;
 stimulusMinBrightness=30;
-stimulusShape=Ellipse;
+stimulusShape=Ellipse; // Available values = ["Ellipse", "Polygon"].
 stimulusInclination=0.0;
 stimulusWidth=0.5;
 stimulusHeight=0.5;
@@ -21,7 +21,7 @@ fixationPointHeight=0.5;
 answerToStimulusKey=ENTER;
 pauseProcedureKey=SPACE;
 cancelProcedureKey=ESCAPE;
-fixationMonitor=None;
+fixationMonitor=None; // Available values = ["None", "Blindspot", "Fixation point change"].
 fixationCheckRate=4;
 blindspotDistFromFixPointHori=15;
 blindspotDistFromFixPointVert=-3;
@@ -37,4 +37,4 @@ blindspotMappingRangeVert_1=-12;
 blindspotMappingRangeVert_2=12;
 blindspotMappingStimulusDisplayRepetitions=2;
 blindspotMappingAccuracy=1.0;
-visualFieldTestBrightnessVectorLength=11; // Must be an odd number >= 11.
+visualFieldTestBrightnessVectorLength=9; // Available values = 9 + 4n, that is for example [9, 13, 17, 21, 25] etc.

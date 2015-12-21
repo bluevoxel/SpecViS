@@ -2,6 +2,7 @@ package org.specvis.data;
 
 /**
  * Created by pdzwiniel on 2015-10-09.
+ * Last update by pdzwiniel on 2015-12-21.
  */
 
 /*
@@ -66,6 +67,7 @@ public class ConfigurationData {
     private static String blindspotMappingStimulusDisplayRepetitions;
     private static String blindspotMappingAccuracy;
     private static String visualFieldTestBrightnessVectorLength;
+    private static String answersVectorLength;
 
     public static String getLuminanceScaleFitPolynomialDegree() {
         return luminanceScaleFitPolynomialDegree;
@@ -385,5 +387,13 @@ public class ConfigurationData {
 
     public static void setVisualFieldTestBrightnessVectorLength(String visualFieldTestBrightnessVectorLength) {
         ConfigurationData.visualFieldTestBrightnessVectorLength = visualFieldTestBrightnessVectorLength;
+    }
+
+    public static String getAnswersVectorLength() {
+        return answersVectorLength;
+    }
+
+    public static void setAnswersVectorLength(String answersVectorLength) {
+        ConfigurationData.answersVectorLength = answersVectorLength;
     }
 }

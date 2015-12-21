@@ -18,7 +18,6 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.specvis.data.ConfigurationData;
 
 import java.util.ArrayList;
@@ -27,22 +26,7 @@ import java.util.Random;
 
 /**
  * Created by pdzwiniel on 2015-06-08.
- * Last update by pdzwiniel on 2015-11-20.
- *
- * INFO:
- *
- * NOTEPAD:
- * 1. removed.
- * 2. removed.
- * 3. removed.
- * 4. For each point in each quarter there is a specified algorithm of operations:
- *  4.1. Display stimulus of brightness equals to X[4] (50).
- *  4.2. If participant answered to the stimulus positevely, ignore brightness values above X[4], ie. 60, 70, 80 etc.
- *  4.3. Display stimulus of brightness equals to X[2] (30).
- *  4.4. If participant answered to the stimulus negatively, ignore brightness values below X[2], ie. 20 and 10.
- *  4.5. Display stimulus of brightness equals to X[3] (40).
- *  4.6. If participant answered to the stimulus negatively, the visual sensitivity in this point is equal X[4] (50),
- *  otherwise visual sensitivity in this point is equal X[2] (30).
+ * Last update by pdzwiniel on 2015-12-21.
  */
 
 /*
@@ -109,6 +93,7 @@ public class MainProcedure extends Stage {
     private long startOfTheProcedureTime;
     private long endOfProcedureTime;
     private int visualFieldTestBrightnessVectorLength;
+    private int answersVectorLength;
 
     public Parent createContent() {
 
@@ -153,6 +138,8 @@ public class MainProcedure extends Stage {
             brightnessVector[i] = (int) d;
         }
         data.setStimuliVerifiedBrightnessValues(brightnessVector);
+
+        answersVectorLength = Integer.valueOf(ConfigurationData.getAnswersVectorLength());
 
         /* layout */
         BorderPane layout = new BorderPane();
@@ -201,7 +188,11 @@ public class MainProcedure extends Stage {
                 stimulus.setStimulusDisplayTimeInMs(data.getStimulusDisplayTime());
 
                 // Answers.
-                stimulus.setStimulusAnswers(new int[]{0, 0, 0, 0});
+                //stimulus.setStimulusAnswers(new int[]{0, 0, 0, 0});
+                stimulus.setStimulusAnswers(new int[answersVectorLength]);
+                for (int z = 0; z < stimulus.getStimulusAnswers().length; z++) {
+                    stimulus.getStimulusAnswers()[z] = 0;
+                }
 
                 // ** Add stimulus to list.
                 stimuliList.add(stimulus);
@@ -361,129 +352,237 @@ public class MainProcedure extends Stage {
         });
     }
 
+    /**
+     * Method responsible for deactivating currently displayed stimulus based on patient answers provided
+     * to this stimulus and evaluating its brightness threshold.
+     *
+     * Lets consider situation with 9 element stimulus brightness vector. According to the equation
+     * "x = (n + 7) / 4", for the stimulus with 9 element brightness vector patient can provide
+     * maximum 4 answers, ie. "(9 + 7) / 4 = 4". Answer "YES" is see by Specvis as "2", "NO" as "1",
+     * lack of the answer for brightness value not yet used is see as "0".
+     *
+     * Taking this into account, lets consider how Specvis will evaluate brightness threshold for stimulus
+     * with 4 given answers, ie. [1, 1, 2, 2].
+     *
+     * 1. Specvis display stimulus with brightness value from the middle of the brightness vector (d).
+     *
+     * [ ] [ ] [ ] [ ] [d] [ ] [ ] [ ] [ ]
+     *
+     * 2. Patient answers "No" to this stimulus. All fields on the left of the current brightness value are
+     * disabled (x) including current brightness value. Next stimulus is displayed with brightness value
+     * two fields higher than last (d).
+     *
+     * [x] [x] [x] [x] [x] [ ] [d] [ ] [ ]
+     *
+     * 3. Patient answers "No" to this stimulus. All fields on the left of the current brightness value are
+     * disabled (x) including current brightness value. Next stimulus is displayed with brightness value
+     * two fields higher than last (d).
+     *
+     * [x] [x] [x] [x] [x] [x] [x] [ ] [d]
+     *
+     * 4. Patient answers "Yes" to this stimulus. All fields on the right of the current brightness value are
+     * disabled (x) excluding current brightness value. Next stimulus is displayed with brightness value
+     * one field lower than last (d).
+     *
+     * [x] [x] [x] [x] [x] [x] [x] [d] [ ]
+     *
+     * 5. Patient answers "Yes" to this stimulus. All fields on the right of the current brightness value are
+     * disabled (x) excluding current brightness value. Next stimulus is displayed with brightness value
+     * two field lower than last - but in this case all four answers were provided so evaluation is ended.
+     * Brightness threshold is equal to the brightness vector element with index equal to the only not-disabled
+     * field, ie. 7 (e).
+     *
+     * [x] [x] [x] [x] [x] [x] [x] [e] [x]
+     *
+     * @param answers
+     */
     public void deactivateStimulusIfBrightnessThresholdIsEvaluated(int[] answers) {
-        if (answers[2] != 0) {
-            boolean shouldStimulusBeDeactivated = false;
 
-            boolean[] threshold = new boolean[visualFieldTestBrightnessVectorLength];
-            for (int i = 0; i < visualFieldTestBrightnessVectorLength; i++) {
-                threshold[i] = true;
-            }
-            int currentBrightnessIndex = visualFieldTestBrightnessVectorLength / 2; // the middle one
-            int lastBrightnessIndex = visualFieldTestBrightnessVectorLength / 2;
+        int[] answersToStimulus = answers;
+        boolean[] brightnessVectorRepresentation = new boolean[visualFieldTestBrightnessVectorLength];
+        for (int i = 0; i < brightnessVectorRepresentation.length; i++) {
+            brightnessVectorRepresentation[i] = true;
+        }
+        int currentElementIndex = visualFieldTestBrightnessVectorLength / 2;
+        int latestAnswer = -1;
 
-            int currentAnswer;
-            int lastAnswer = answers[0];
-
-            for (int i = 0; i < answers.length; i++) {
-                currentAnswer = answers[i];
-                switch (answers[i]) {
+        for (int i = 0; i < answersToStimulus.length; i++) {
+            if (answersToStimulus[i] != 0) {
+                switch (answersToStimulus[i]) {
                     case 1:
-                        if ((currentBrightnessIndex != 1 && currentBrightnessIndex != (visualFieldTestBrightnessVectorLength - 2)) && currentAnswer == lastAnswer) {
-                            for (int j = 0; j <= lastBrightnessIndex; j++) {
-                                threshold[j] = false;
-                            }
-                            currentBrightnessIndex += 2;
-                        } else {
-                            for (int j = 0; j <= lastBrightnessIndex; j++) {
-                                threshold[j] = false;
-                            }
-                            currentBrightnessIndex += 1;
+                        // Disable all fields to the left from current element index with inclusion of itself.
+                        // ...
+                        // i - current element index
+                        // x - disabled field
+                        // [ ] [ ] [ ] [ ] [i] [ ] [ ] [ ] [ ]
+                        // [x] [x] [x] [x] [x] [ ] [ ] [ ] [ ]
+                        for (int j = 0; j <= currentElementIndex; j++) {
+                            brightnessVectorRepresentation[j] = false;
+                        }
+
+                        // Change current element index base on latest answer.
+                        switch (latestAnswer) {
+                            case 1:
+                                currentElementIndex +=2;
+                                break;
+                            case 2:
+                                currentElementIndex += 1;
+                                break;
+                            default:
+                                currentElementIndex += 2;
+                                break;
                         }
                         break;
                     case 2:
-                        if ((currentBrightnessIndex != 1 && currentBrightnessIndex != (visualFieldTestBrightnessVectorLength - 2)) && currentAnswer == lastAnswer) {
-                            for (int j = (visualFieldTestBrightnessVectorLength - 1); j >= lastBrightnessIndex; j--) {
-                                threshold[j] = false;
+                        // Disable all fields to the right from current element index with exclusion of itself.
+                        // ...
+                        // i - current element index
+                        // x - disabled field
+                        // [ ] [ ] [ ] [ ] [i] [ ] [ ] [ ] [ ]
+                        // [ ] [ ] [ ] [ ] [i] [x] [x] [x] [x]
+                        if (currentElementIndex != brightnessVectorRepresentation.length - 1) {
+                            for (int j = currentElementIndex + 1; j < brightnessVectorRepresentation.length; j++) {
+                                brightnessVectorRepresentation[j] = false;
                             }
-                            currentBrightnessIndex -= 2;
-                        } else {
-                            for (int j = (visualFieldTestBrightnessVectorLength - 1); j >= lastBrightnessIndex; j--) {
-                                threshold[j] = false;
-                            }
-                            currentBrightnessIndex -= 1;
                         }
+
+                        // Change current element index base on latest answer.
+                        switch (latestAnswer) {
+                            case 1:
+                                currentElementIndex -= 1;
+                                break;
+                            case 2:
+                                currentElementIndex -= 2;
+                                break;
+                            default:
+                                currentElementIndex -= 2;
+                                break;
+                        }
+                }
+
+                // Set latest answer.
+                latestAnswer = answersToStimulus[i];
+            } else {
+
+                // If there are no more answers, break the loop.
+                break;
+            }
+        }
+
+        // If there is only one not-disabled field,
+        // deactivate current stimulus.
+        int truesCount = 0;
+        int indexOfTheOnlyTrue = -1;
+        boolean deactivateThisStimulus = false;
+        for (int i = 0; i < brightnessVectorRepresentation.length; i++) {
+            if (brightnessVectorRepresentation[i]) {
+                truesCount++;
+                indexOfTheOnlyTrue = i;
+            }
+        }
+        if (truesCount <= 1) {
+            deactivateThisStimulus = true;
+        }
+
+        // 1. Set evaluated brightness threshold.
+        // 2. Remove currently displayed stimulus from active stimuli list.
+        // 3. Add answers to stimulus to StimulusResults.
+        // 4. Set text for ShellWindow progress bar.
+        // 5. Add appropriate text information about deactivated stimulus to ShellWindow.
+        // 6. If active stimuli list is empty, finish the procedure.
+        if (deactivateThisStimulus) {
+
+            // Ad. 1.
+            if (indexOfTheOnlyTrue == -1) {
+                currentlyDisplayedStimulus.setEvaluatedBrightnessThreshold(indexOfTheOnlyTrue);
+            } else {
+                currentlyDisplayedStimulus.setEvaluatedBrightnessThreshold(brightnessVector[indexOfTheOnlyTrue]);
+            }
+
+            // Ad. 2.
+            activeStimuliIndices.remove(new Integer(currentlyDisplayedStimulus.getStimulusAssignedIndex()));
+
+            // Ad. 3.
+            StimulusResults stimulusResults = new StimulusResults();
+            stimulusResults.setStimulusNumber(currentlyDisplayedStimulus.getStimulusAssignedIndex());
+            stimulusResults.setStimulusGridCoordinatesXY(currentlyDisplayedStimulus.getStimulusCellCoordinatesXY());
+            stimulusResults.setStimulusBrightnessThreshold(currentlyDisplayedStimulus.getEvaluatedBrightnessThreshold());
+            if (indexOfTheOnlyTrue == -1) {
+                stimulusResults.setStimulusLuminanceThreshold(indexOfTheOnlyTrue);
+            } else {
+                stimulusResults.setStimulusLuminanceThreshold(data.getScreenLuminanceFunctions().round(data.getLuminanceScaleDataForStimuli().getLuminanceForBrightness()[currentlyDisplayedStimulus.getEvaluatedBrightnessThreshold()], 2));
+            }
+            stimuliAnswers.add(stimulusResults);
+
+            // Ad. 4.
+            String s = shellWindowForMainProcedure.getTextProgressBar().getText();
+            String[] str = s.split("/");
+            int numberOfCurrentStimulus = Integer.valueOf(str[0]) + 1;
+            int totalNumberOfStimuliToShow = Integer.valueOf(str[1]);
+            shellWindowForMainProcedure.getTextProgressBar().setText(String.valueOf(numberOfCurrentStimulus) + "/" + String.valueOf(totalNumberOfStimuliToShow));
+            shellWindowForMainProcedure.getProgressBar().setProgress(1.0 * (Double.valueOf(numberOfCurrentStimulus) / Double.valueOf(totalNumberOfStimuliToShow)));
+
+            // Ad. 5.
+            double stimulusMaxLuminance = data.getLuminanceScaleDataForStimuli().getLuminanceForBrightness()[data.getStimulusMaxBrightness()];
+            double backgroundLuminance = data.getLuminanceScaleDataForBackground().getLuminanceForBrightness()[data.getBackgroundBrightness()];
+            int stimulusId = currentlyDisplayedStimulus.getStimulusAssignedIndex();
+            int stimulusBrightnessThreshold = currentlyDisplayedStimulus.getEvaluatedBrightnessThreshold();
+            double stimulusLuminanceThreshold = 0;
+            double stimulusDecibelThreshold = 0;
+            if (indexOfTheOnlyTrue == -1) {
+                stimulusLuminanceThreshold = indexOfTheOnlyTrue;
+                stimulusDecibelThreshold = indexOfTheOnlyTrue;
+            } else {
+                stimulusLuminanceThreshold = data.getScreenLuminanceFunctions().round(data.getLuminanceScaleDataForStimuli().getLuminanceForBrightness()[currentlyDisplayedStimulus.getEvaluatedBrightnessThreshold()], 2);
+                stimulusDecibelThreshold = data.getScreenLuminanceFunctions().decibelsValue(stimulusMaxLuminance, stimulusLuminanceThreshold, backgroundLuminance, 2);
+            }
+            shellWindowForMainProcedure.addTextToTextArea(stimulusId + "\t" + stimulusBrightnessThreshold + "\t" + stimulusLuminanceThreshold + "\t" + stimulusDecibelThreshold + "\n");
+
+            // Ad. 6.
+            if (activeStimuliIndices.size() == 0) {
+                stimulusTimeline.stop();
+                procedureIsFinished = true;
+                data.setIsMainProcedureFinished(true);
+                data.setMainProcedureStimuliResults(stimuliAnswers);
+                shellWindowForMainProcedure.setProcedureStatus("PROCEDURE IS FINISHED", "#FFFFFF");
+
+                int occurrences;
+                switch (fixationMonitor) {
+                    case "Blindspot":
+                        occurrences = (int) fixationMonitorAnswers.stream().filter(f -> f == false).count();
+                        shellWindowForMainProcedure.addTextToTextArea("\n" + "RESULTS (FIXATION MONITOR)" + "\n");
+                        shellWindowForMainProcedure.addTextToTextArea("Total fixation checks:" + "\t" + fixationMonitorAnswers.size() + "\n");
+                        shellWindowForMainProcedure.addTextToTextArea("Positive fixation checks:" + "\t" + occurrences + "\n");
+                        shellWindowForMainProcedure.addTextToTextArea("Fixation accuracy rate (%):" + "\t" + data.getScreenLuminanceFunctions().round(((double) occurrences / fixationMonitorAnswers.size()) * 100, 2) + "\n");
+                        break;
+                    case "Fixation point change":
+                        occurrences = (int) fixationMonitorAnswers.stream().filter(f -> f == true).count();
+                        shellWindowForMainProcedure.addTextToTextArea("\n" + "RESULTS (FIXATION MONITOR)" + "\n");
+                        shellWindowForMainProcedure.addTextToTextArea("Total fixation checks:" + "\t" + fixationMonitorAnswers.size() + "\n");
+                        shellWindowForMainProcedure.addTextToTextArea("Positive fixation checks:" + "\t" + occurrences + "\n");
+                        shellWindowForMainProcedure.addTextToTextArea("Fixation accuracy rate (%):" + "\t" + data.getScreenLuminanceFunctions().round(((double) occurrences / fixationMonitorAnswers.size()) * 100, 2) + "\n");
                         break;
                 }
 
-                if (currentBrightnessIndex > (visualFieldTestBrightnessVectorLength - 1) || currentBrightnessIndex < 0) {
-                    currentlyDisplayedStimulus.setEvaluatedBrightnessThreshold(brightnessVector[lastBrightnessIndex]);
-                    shouldStimulusBeDeactivated = true;
-                    break;
-                } else if (!threshold[currentBrightnessIndex]) {
-                    if (brightnessVector[lastBrightnessIndex] > brightnessVector[currentBrightnessIndex]) {
-                        currentlyDisplayedStimulus.setEvaluatedBrightnessThreshold(brightnessVector[lastBrightnessIndex]);
-                    } else {
-                        currentlyDisplayedStimulus.setEvaluatedBrightnessThreshold(brightnessVector[lastBrightnessIndex+1]);
-                    }
-                    shouldStimulusBeDeactivated = true;
-                    break;
-                }
-                lastAnswer = answers[i];
-                lastBrightnessIndex = currentBrightnessIndex;
+                shellWindowForMainProcedure.addTextToTextArea("\n" + "TOTAL TIME OF THE PROCEDURE" + "\n");
+                endOfProcedureTime = System.currentTimeMillis();
+                shellWindowForMainProcedure.addTextToTextArea(data.getScreenLuminanceFunctions().totalTime(startOfTheProcedureTime, endOfProcedureTime));
             }
 
-            if (shouldStimulusBeDeactivated) {
-                activeStimuliIndices.remove(new Integer(currentlyDisplayedStimulus.getStimulusAssignedIndex()));
-
-                // STIMULI RESULTS
-                String s = shellWindowForMainProcedure.getTextProgressBar().getText();
-                String[] string = s.split("/");
-                int numberOfCurrentStimulus = Integer.valueOf(string[0]) + 1;
-                int totalNumberOfStimulusToShow = Integer.valueOf(string[1]);
-
-                shellWindowForMainProcedure.getTextProgressBar().setText(String.valueOf(numberOfCurrentStimulus) + "/" + String.valueOf(totalNumberOfStimulusToShow));
-                shellWindowForMainProcedure.getProgressBar().setProgress(1.0 * (Double.valueOf(numberOfCurrentStimulus) / Double.valueOf(totalNumberOfStimulusToShow)));
-
-                double stiMaxLum = data.getLuminanceScaleDataForStimuli().getLuminanceForBrightness()[data.getStimulusMaxBrightness()];
-                double bgLum = data.getLuminanceScaleDataForBackground().getLuminanceForBrightness()[data.getBackgroundBrightness()];
-                int stiID = currentlyDisplayedStimulus.getStimulusAssignedIndex();
-                int stibBrighThresh = currentlyDisplayedStimulus.getEvaluatedBrightnessThreshold();
-                double stiLumThresh = data.getScreenLuminanceFunctions().round(data.getLuminanceScaleDataForStimuli().getLuminanceForBrightness()[currentlyDisplayedStimulus.getEvaluatedBrightnessThreshold()], 2);
-                double stiDbThresh = data.getScreenLuminanceFunctions().decibelsValue(stiMaxLum, stiLumThresh, bgLum, 2);
-
-                shellWindowForMainProcedure.addTextToTextArea(stiID + "\t" + stibBrighThresh + "\t" + stiLumThresh + "\t" + stiDbThresh + "\n");
-
-                // Add answers to hashmap.
-                StimulusResults stimulusResults = new StimulusResults();
-                stimulusResults.setStimulusNumber(currentlyDisplayedStimulus.getStimulusAssignedIndex());
-                stimulusResults.setStimulusGridCoordinatesXY(currentlyDisplayedStimulus.getStimulusCellCoordinatesXY());
-                stimulusResults.setStimulusBrightnessThreshold(currentlyDisplayedStimulus.getEvaluatedBrightnessThreshold());
-                stimulusResults.setStimulusLuminanceThreshold(data.getScreenLuminanceFunctions().round(data.getLuminanceScaleDataForStimuli().getLuminanceForBrightness()[currentlyDisplayedStimulus.getEvaluatedBrightnessThreshold()], 2));
-                stimuliAnswers.add(stimulusResults);
-
-                if (activeStimuliIndices.size() == 0) {
-                    stimulusTimeline.stop();
-                    procedureIsFinished = true;
-                    data.setIsMainProcedureFinished(true);
-                    data.setMainProcedureStimuliResults(stimuliAnswers);
-                    shellWindowForMainProcedure.setProcedureStatus("PROCEDURE IS FINISHED", "#FFFFFF");
-
-                    int occurrences;
-                    switch (fixationMonitor) {
-
-                        case "Blindspot":
-                            occurrences = (int) fixationMonitorAnswers.stream().filter(f -> f == false).count();
-                            shellWindowForMainProcedure.addTextToTextArea("\n" + "RESULTS (FIXATION MONITOR)" + "\n");
-                            shellWindowForMainProcedure.addTextToTextArea("Total fixation checks:" + "\t" + fixationMonitorAnswers.size() + "\n");
-                            shellWindowForMainProcedure.addTextToTextArea("Positive fixation checks:" + "\t" + occurrences + "\n");
-                            shellWindowForMainProcedure.addTextToTextArea("Fixation accuracy rate (%):" + "\t" + data.getScreenLuminanceFunctions().round(((double) occurrences / fixationMonitorAnswers.size()) * 100, 2) + "\n");
-                            break;
-                        case "Fixation point change":
-
-                            occurrences = (int) fixationMonitorAnswers.stream().filter(f -> f == true).count();
-                            shellWindowForMainProcedure.addTextToTextArea("\n" + "RESULTS (FIXATION MONITOR)" + "\n");
-                            shellWindowForMainProcedure.addTextToTextArea("Total fixation checks:" + "\t" + fixationMonitorAnswers.size() + "\n");
-                            shellWindowForMainProcedure.addTextToTextArea("Positive fixation checks:" + "\t" + occurrences + "\n");
-                            shellWindowForMainProcedure.addTextToTextArea("Fixation accuracy rate (%):" + "\t" + data.getScreenLuminanceFunctions().round(((double) occurrences / fixationMonitorAnswers.size()) * 100, 2) + "\n");
-                            break;
-                    }
-
-                    shellWindowForMainProcedure.addTextToTextArea("\n" + "TOTAL TIME OF THE PROCEDURE" + "\n");
-                    endOfProcedureTime = System.currentTimeMillis();
-                    shellWindowForMainProcedure.addTextToTextArea(data.getScreenLuminanceFunctions().totalTime(startOfTheProcedureTime, endOfProcedureTime));
+            // TEST - output to console information about answers to stimuli.
+            int[] a = currentlyDisplayedStimulus.getStimulusAnswers();
+            String ans = "";
+            for (int i = -1; i < a.length + 1; i++) {
+                if (i == -1) {
+                    ans += "[";
+                } else if (i == a.length) {
+                    ans += "]";
+                } else {
+                    ans += a[i];
                 }
             }
+            System.out.println("STI:" + "\t" + currentlyDisplayedStimulus.getStimulusAssignedIndex() + "\t" + "BR:" + "\t" +
+                    indexOfTheOnlyTrue + "\t" + "A:" + "\t" + ans + "\t" + "DEACTIVATED");
         }
     }
 
@@ -498,37 +597,62 @@ public class MainProcedure extends Stage {
         procedureTimeline.play();
     }
 
-    public int whatBrightnessStimulusShouldHave(int[] answers) {
+    public int getIndexOfNextStimulusBrightness(int[] answers) {
+        int[] answersToStimulus = answers;
+        int brightnessIndex = visualFieldTestBrightnessVectorLength / 2;
+        int latestAnswer = -1;
 
-        int brightnessIndex = visualFieldTestBrightnessVectorLength / 2; // the middle one
-
-        int currentAnswer;
-        int lastAnswer = answers[0];
-
-        for (int i = 0; i < answers.length; i++) {
-            currentAnswer = answers[i];
-            if (answers[i] == 0) {
-                break;
-            } else {
-                switch (answers[i]) {
+        for (int i = 0; i < answersToStimulus.length; i++) {
+            if (answersToStimulus[i] != 0) {
+                switch (answersToStimulus[i]) {
                     case 1:
-                        if ((brightnessIndex != 1 && brightnessIndex != (visualFieldTestBrightnessVectorLength - 2)) && currentAnswer == lastAnswer) {
-                            brightnessIndex += 2;
-                        } else {
-                            brightnessIndex += 1;
+                        switch (latestAnswer) {
+                            case 1:
+                                brightnessIndex += 2;
+                                break;
+                            case 2:
+                                brightnessIndex += 1;
+                                break;
+                            default:
+                                brightnessIndex += 2;
+                                break;
                         }
                         break;
                     case 2:
-                        if ((brightnessIndex != 1 && brightnessIndex != (visualFieldTestBrightnessVectorLength - 2)) && currentAnswer == lastAnswer) {
-                            brightnessIndex -= 2;
-                        } else {
-                            brightnessIndex -= 1;
+                        switch (latestAnswer) {
+                            case 1:
+                                brightnessIndex -= 1;
+                                break;
+                            case 2:
+                                brightnessIndex -= 2;
+                                break;
+                            default:
+                                brightnessIndex -= 2;
+                                break;
                         }
                         break;
                 }
+                latestAnswer = answersToStimulus[i];
+            } else {
+                break;
             }
-            lastAnswer = answers[i];
         }
+
+        // TEST - output to console information about answers to stimuli.
+        int[] a = currentlyDisplayedStimulus.getStimulusAnswers();
+        String ans = "";
+        for (int i = -1; i < a.length + 1; i++) {
+            if (i == -1) {
+                ans += "[";
+            } else if (i == a.length) {
+                ans += "]";
+            } else {
+                ans += a[i];
+            }
+        }
+        System.out.println("STI:" + "\t" + currentlyDisplayedStimulus.getStimulusAssignedIndex() + "\t" + "BR:" + "\t" +
+                brightnessIndex + "\t" + "A:" + "\t" + ans);
+
         return brightnessVector[brightnessIndex];
     }
 
@@ -539,16 +663,17 @@ public class MainProcedure extends Stage {
         int index = activeStimuliIndices.get(r);
         currentlyDisplayedStimulus = stimuliList.get(index);
 
-        // Ustawienie warto�ci jasno�ci na podstawie dotychczas udzielonych odpowiedzi.
-        int brightnessLevel = whatBrightnessStimulusShouldHave(currentlyDisplayedStimulus.getStimulusAnswers());
-        Color newColor = Color.hsb(Integer.valueOf(data.getLuminanceScaleDataForStimuli().getScaleHue()),
-                Double.valueOf(data.getLuminanceScaleDataForStimuli().getScaleSaturation()) / 100,
-                Double.valueOf(brightnessLevel) / 100);
-        currentlyDisplayedStimulus.getStimulusShape().setFill(newColor);
-        currentlyDisplayedStimulus.getStimulusShape().setStroke(newColor);
-
         KeyFrame displayStimulus = new KeyFrame(Duration.millis(0), event -> {
             permissionToAnswer = true;
+
+            // Set stimulus brightness value based on provided answers.
+            int brightnessLevel = getIndexOfNextStimulusBrightness(currentlyDisplayedStimulus.getStimulusAnswers());
+            Color newColor = Color.hsb(Integer.valueOf(data.getLuminanceScaleDataForStimuli().getScaleHue()),
+                    Double.valueOf(data.getLuminanceScaleDataForStimuli().getScaleSaturation()) / 100,
+                    Double.valueOf(brightnessLevel) / 100);
+            currentlyDisplayedStimulus.getStimulusShape().setFill(newColor);
+            currentlyDisplayedStimulus.getStimulusShape().setStroke(newColor);
+
             displayPane.getChildren().add(currentlyDisplayedStimulus.getStimulusShape());
         });
         stimulusTimeline.getKeyFrames().add(displayStimulus);

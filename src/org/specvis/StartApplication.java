@@ -21,7 +21,7 @@ import java.util.ArrayList;
 
 /**
  * Created by pdzwiniel on 2015-05-20.
- * Last update by pdzwiniel on 2015-11-20.
+ * Last update by pdzwiniel on 2015-12-21.
  */
 
 /*
@@ -93,7 +93,7 @@ public class StartApplication extends Application {
         );
         labelSpecvisLogo.setPrefSize(720, 270);
 
-        Label labelCopyright = new Label("Copyright \u00a9 2014-2015 Piotr Dzwiniel" + "\n" + "Version 0.2.2");
+        Label labelCopyright = new Label("Copyright \u00a9 2014-2015 Piotr Dzwiniel" + "\n" + "Version 0.2.3");
         labelCopyright.setStyle("-fx-font-size: 14px;");
         labelCopyright.setLayoutX(5);
         labelCopyright.setLayoutY(5);
@@ -200,5 +200,16 @@ public class StartApplication extends Application {
         ConfigurationData.setBlindspotMappingStimulusDisplayRepetitions(configurationValues.get(37));
         ConfigurationData.setBlindspotMappingAccuracy(configurationValues.get(38));
         ConfigurationData.setVisualFieldTestBrightnessVectorLength(configurationValues.get(39));
+
+        int visualFieldTestBrightnessVectorLength = Integer.valueOf(ConfigurationData.getVisualFieldTestBrightnessVectorLength());
+
+        /**
+         * Depending on the value of "visualFieldTestBrightnessVectorLength" (n) Specvis set different value
+         * for "answerToStimulusVectorLength" (x). Basically, there is equation which can be used to calculate
+         * "x" value depending on "n" value, ie. "x = (n + 7) / 4". For instance "n = 9", so "x = (9 + 7) / 4 = 4".
+         */
+        int answerToStimulusVectorLength = (visualFieldTestBrightnessVectorLength + 7) / 4;
+
+        ConfigurationData.setAnswersVectorLength(String.valueOf(answerToStimulusVectorLength));
     }
 }
