@@ -93,7 +93,7 @@ public class StartApplication extends Application {
         );
         labelSpecvisLogo.setPrefSize(720, 270);
 
-        Label labelCopyright = new Label("Copyright \u00a9 2014-2015 Piotr Dzwiniel" + "\n" + "Version 0.2.3");
+        Label labelCopyright = new Label("Copyright \u00a9 2014-2015 Piotr Dzwiniel" + "\n" + "Version 0.2.4");
         labelCopyright.setStyle("-fx-font-size: 14px;");
         labelCopyright.setLayoutX(5);
         labelCopyright.setLayoutY(5);
@@ -153,7 +153,7 @@ public class StartApplication extends Application {
             String line;
             while ((line = bufferedReader.readLine()) != null) {
                 String[] str = line.split("=|;");
-                configurationValues.add(str[1]);
+                configurationValues.add(str[1].replaceAll("\"", ""));
             }
             bufferedReader.close();
         } catch (IOException ex) {

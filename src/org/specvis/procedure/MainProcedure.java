@@ -917,6 +917,17 @@ public class MainProcedure extends Stage {
         shellWindowForMainProcedure.addTextToTextArea("Luminance (cd/m2):" + "\t" + data.getScreenLuminanceFunctions().round(data.getLuminanceScaleDataForBackground().getLuminanceForBrightness()[data.getBackgroundBrightness()], 2) + "\n");
         shellWindowForMainProcedure.addTextToTextArea("Grid resolution (XY):" + "\t" + data.getQuarterGridResolutionX() + "\t" + data.getQuarterGridResolutionY() + "\n\n");
 
+        shellWindowForMainProcedure.addTextToTextArea("BRIGHTNESS VECTOR ELEMENTS" + "\n");
+        String brightnessVectorElements = "";
+        for (int i = 0; i < brightnessVector.length; i++) {
+            if (i == brightnessVector.length - 1) {
+                brightnessVectorElements += brightnessVector[i] + "\n\n";
+            } else {
+                brightnessVectorElements += brightnessVector[i] + "\t";
+            }
+        }
+        shellWindowForMainProcedure.addTextToTextArea(brightnessVectorElements);
+
         shellWindowForMainProcedure.addTextToTextArea("FIXATION POINT INFO" + "\n");
         shellWindowForMainProcedure.addTextToTextArea("Hue:" + "\t" + data.getFixPointHue() + "\n");
         shellWindowForMainProcedure.addTextToTextArea("Saturation:" + "\t" + data.getFixPointSaturation() + "\n");
